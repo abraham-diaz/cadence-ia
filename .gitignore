@@ -1,0 +1,40 @@
+
+#Claude
+CLAUDE.md
+
+# _____________________
+#    Temporary Staff
+# _____________________
+# node_modules
+node_modules/
+
+# Python
+.venv/
+__pycache__/
+
+#pytest
+.pytest_cache/
+
+#Pip Install
+*.egg-info
+
+#Vite
+apps/frontend/dist/
+
+# _____________________
+#   Environment variables
+# _____________________
+.env
+
+# _____________________
+#    Data
+# _____________________
+*.db
+*.sqlite
+*.tcx
+
+# _____________________
+#    VSC settings
+# _____________________
+
+.vscode

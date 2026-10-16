@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cadence_ia"
+version = "0.1.0"
+description = "Personal training assistant that analyzes heart-rate data from Fitbit TCX workouts."
+requires-python = ">=3.11"
+authors = [{name = "Abraham Díaz"}]
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]

@@ -1,0 +1,8 @@
+[Unit]
+Description=cadence-ia: daily database backup
+After=docker.service
+
+[Service]
+Type=oneshot
+User=abraham
+ExecStart=/bin/bash /home/abraham/cadence-ia/deploy/backup.sh

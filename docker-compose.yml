@@ -1,0 +1,19 @@
+services:
+  api:
+    build: .
+    image: cadence-ia
+    container_name: cadence-ia
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # GEMINI_API_KEY and other settings.
+    env_file: apps/backend/.env
+    environment:
+      # Paths inside the container. They win over any dev paths in the .env.
+      CADENCE_DATA_DIR: /data/tcx
+      CADENCE_DB: /data/db/cadence.db
+    volumes:
+      # TCX files downloaded by rclone on the host (read only).
+      - ${CADENCE_TCX_DIR:-~/cadencia-ia/entrada}:/data/tcx:ro
+      # SQLite database: lives on the host so it survives rebuilds.
+      - ${CADENCE_DB_DIR:-~/cadencia-ia/data}:/data/db

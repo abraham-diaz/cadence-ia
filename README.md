@@ -49,7 +49,7 @@ flowchart LR
 | Analysis   | Pure Python: TCX parsing with `xml.etree`, resampling, smoothing, zigzag peak detection |
 | LLM        | Google Gemini (`google-genai`) with structured JSON output |
 | Frontend   | React 19, TypeScript, Vite, React Router, ECharts |
-| Deployment | Raspberry Pi 4 (Debian 12), systemd, rclone (iCloud Drive) |
+| Deployment | Docker (multi-stage image), Raspberry Pi 4 (Debian 12), systemd timers, rclone (iCloud Drive) |
 | Tests      | pytest (backend), oxlint (frontend) |
 
 ## Repository layout
@@ -66,10 +66,16 @@ cadence-ia/
 │   │   │   ├── ingest.py      # store new TCX files in the database
 │   │   │   ├── assessment.py  # LLM assessment (Gemini)
 │   │   │   ├── api.py         # FastAPI app
+│   │   │   ├── frontend.py    # serves the built React app
 │   │   │   └── cli.py         # `cadence-ia` command
 │   │   └── tests/
 │   └── frontend/              # React + Vite + TypeScript PWA
-└── deploy/                    # Raspberry Pi setup (systemd units, scripts) — coming in step 7
+├── deploy/
+│   ├── sync.sh                # rclone copy + ingest
+│   ├── backup.sh              # daily SQLite backup
+│   └── systemd/               # timers for both scripts
+├── Dockerfile                 # builds the frontend, then the Python image
+└── docker-compose.yml
 ```
 
 ## Getting started (development)
@@ -139,6 +145,73 @@ cd apps/frontend && npm run lint      # frontend
 The tests build synthetic TCX files, so they run without any personal data. A few extra tests use
 a real workout from `tests/data/` and are skipped when it isn't there (TCX files are git-ignored).
 
+## Deployment (Raspberry Pi)
+
+The app runs as one Docker container: a multi-stage build compiles the React app with Node and
+copies it into a slim Python image, where FastAPI serves both the API and the web app on port
+8000. rclone stays on the host (its iCloud session has to be renewed by hand now and then), and
+two systemd timers drive the rest:
+
+| Timer | Runs | What it does |
+|-------|------|--------------|
+| `cadence-sync.timer` | every 15 min | `rclone copy` from iCloud, then `cadence-ia ingest` in the container |
+| `cadence-backup.timer` | daily, 03:30 | consistent SQLite backup, keeping the last 14 |
+
+Data lives on the host, mounted into the container, so rebuilding the image never touches it:
+
+| Host | Container | |
+|------|-----------|---|
+| `~/cadencia-ia/entrada` | `/data/tcx` (read only) | TCX files downloaded by rclone |
+| `~/cadencia-ia/data` | `/data/db` | `cadence.db` and `backups/` |
+
+### First install
+
+Assumes rclone is already configured with an `icloud` remote.
+
+```bash
+# Docker and git
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER      # then log out and back in
+sudo apt install -y git
+
+# Code, data folder and secrets
+git clone https://github.com/abraham-diaz/cadence-ia.git ~/cadence-ia
+cd ~/cadence-ia
+mkdir -p ~/cadencia-ia/entrada ~/cadencia-ia/data
+cp apps/backend/.env.example apps/backend/.env
+nano apps/backend/.env             # set GEMINI_API_KEY
+chmod 600 apps/backend/.env
+
+# Build and start (the first build on a Pi 4 takes a few minutes)
+docker compose up -d --build
+
+# First sync by hand, then enable the timers
+bash deploy/sync.sh
+sudo cp deploy/systemd/* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now cadence-sync.timer cadence-backup.timer
+```
+
+Then open `http://<pi-ip>:8000` on the phone and use *Share → Add to Home Screen*.
+
+The container runs as uid 1000 (the first user on Raspberry Pi OS / Debian). If your user has a
+different uid, build with `docker compose build --build-arg UID=$(id -u)`.
+
+### Updating
+
+```bash
+cd ~/cadence-ia && git pull && docker compose up -d --build
+```
+
+### Useful commands
+
+```bash
+docker compose logs -f                     # API logs
+systemctl list-timers 'cadence-*'          # next runs
+journalctl -u cadence-sync -n 50           # last sync / ingest output
+rclone config reconnect icloud:            # when the iCloud session expires
+```
+
 ## API
 
 | Method | Path | Description |
@@ -172,8 +245,8 @@ a real workout from `tests/data/` and are skipped when it isn't there (TCX files
 - [x] **4. Mobile-first frontend**: session list and detail with the HR curve
 - [x] **5. SQLite history**: ingestion, workout types (CRUD) and comparisons between sessions
 - [x] **6. AI assessment** with Gemini, shown in the frontend
-- [ ] **7. Deployment on the Raspberry Pi**: FastAPI serving the built frontend, systemd service,
-      rclone + ingest timer, database backups
+- [ ] **7. Deployment on the Raspberry Pi**: Docker image serving API + frontend, rclone + ingest
+      timer, daily database backups
 - [ ] Alerts when the rclone iCloud session expires (ntfy, Telegram…)
 - [ ] Cardio sessions: pace, per-km splits, smoothed elevation and a route map coloured by HR
 - [ ] Heart-rate zones once the max HR is known

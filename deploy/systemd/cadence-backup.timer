@@ -1,0 +1,9 @@
+[Unit]
+Description=cadence-ia: back up the database every night
+
+[Timer]
+OnCalendar=*-*-* 03:30
+Persistent=true
+
+[Install]
+WantedBy=timers.target

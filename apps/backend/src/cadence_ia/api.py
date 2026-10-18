@@ -1,9 +1,11 @@
 """HTTP API. Run with: uvicorn cadence_ia.api:app --reload"""
 
 import json
+import os
 import sqlite3
 from collections.abc import Callable, Iterator, Mapping
 from datetime import datetime
+from pathlib import Path
 from typing import Annotated, Literal
 
 from dotenv import load_dotenv
@@ -12,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from cadence_ia import assessment, db
 from cadence_ia.compare import STAT_FIELDS, baseline
+from cadence_ia.frontend import mount_frontend
 
 # Secrets such as GEMINI_API_KEY live in apps/backend/.env (never committed).
 load_dotenv()
@@ -297,3 +300,11 @@ def delete_workout_type(type_id: int, conn: Database) -> Response:
     if not db.delete_type(conn, type_id):
         raise HTTPException(status_code=404, detail="Workout type not found")
     return Response(status_code=204)
+
+
+# --- Web app ----------------------------------------------------------------
+
+# In production (Docker) CADENCE_STATIC_DIR points to the compiled frontend.
+# Registered last: its catch-all route must not shadow the API routes above.
+if static_dir := os.environ.get("CADENCE_STATIC_DIR"):
+    mount_frontend(app, Path(static_dir))

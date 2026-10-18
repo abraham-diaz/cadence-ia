@@ -8,11 +8,16 @@ version = "0.1.0"
 description = "Personal training assistant that analyzes heart-rate data from Fitbit TCX workouts."
 requires-python = ">=3.11"
 authors = [{name = "Abraham Díaz"}]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
 
 [project.scripts]
 cadence-ia = "cadence_ia.cli:main"
 
 [project.optional-dependencies]
 dev = [
-    "pytest"
+    "pytest",
+    "httpx2",
 ]

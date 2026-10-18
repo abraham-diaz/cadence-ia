@@ -11,6 +11,8 @@ TZ = timezone(timedelta(hours=2))
 
 @pytest.fixture(scope="module")
 def activity():
+    if not SAMPLE.exists():
+        pytest.skip("private sample TCX not present")
     return parse_tcx(SAMPLE)
 
 

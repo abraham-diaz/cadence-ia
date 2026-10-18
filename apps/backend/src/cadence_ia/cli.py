@@ -1,7 +1,15 @@
-"""Command-line entry point: `cadence-ia <file.tcx>`."""
+"""Command-line entry point.
+
+    cadence-ia show <file.tcx>     summarize one workout
+    cadence-ia ingest [--force]    store new TCX files in the database
+"""
 
 import argparse
+import logging
+from pathlib import Path
 
+from cadence_ia import db
+from cadence_ia.ingest import data_dir, ingest
 from cadence_ia.metrics import analyze
 from cadence_ia.tcx import parse_tcx
 
@@ -15,12 +23,8 @@ def _avg(values: list[int]) -> float | None:
     return sum(values) / len(values) if values else None
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Summarize a TCX workout.")
-    parser.add_argument("file", help="path to the .tcx file")
-    args = parser.parse_args()
-
-    activity = parse_tcx(args.file)
+def show(file: str) -> None:
+    activity = parse_tcx(file)
     metrics = analyze(activity)
 
     print(f"Activity:    {activity.id} ({activity.sport})")
@@ -50,5 +54,46 @@ def main() -> None:
         print(f"Avg HR drop after 60 s of rest: {_avg(drops):.0f} bpm")
 
 
+def run_ingest(folder: Path, db_file: Path, force: bool) -> int:
+    if not folder.is_dir():
+        print(f"Data folder not found: {folder}")
+        return 1
+    conn = db.connect(db_file)
+    try:
+        result = ingest(conn, folder, force=force)
+    finally:
+        conn.close()
+    print(f"Folder:   {folder}")
+    print(f"Database: {db_file}")
+    print(f"Added {len(result.added)}, already stored {len(result.skipped)}, failed {len(result.failed)}")
+    for name in result.failed:
+        print(f"  failed: {name}")
+    return 1 if result.failed else 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
+
+    parser = argparse.ArgumentParser(prog="cadence-ia", description="Analyze TCX workouts.")
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    show_cmd = commands.add_parser("show", help="summarize one TCX file")
+    show_cmd.add_argument("file", help="path to the .tcx file")
+
+    ingest_cmd = commands.add_parser("ingest", help="store new TCX files in the database")
+    ingest_cmd.add_argument("--data-dir", type=Path, default=None,
+                            help="folder with .tcx files (default: $CADENCE_DATA_DIR)")
+    ingest_cmd.add_argument("--db", type=Path, default=None,
+                            help="SQLite file (default: $CADENCE_DB)")
+    ingest_cmd.add_argument("--force", action="store_true",
+                            help="analyze again files already stored")
+
+    args = parser.parse_args(argv)
+    if args.command == "show":
+        show(args.file)
+        return 0
+    return run_ingest(args.data_dir or data_dir(), args.db or db.db_path(), args.force)
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

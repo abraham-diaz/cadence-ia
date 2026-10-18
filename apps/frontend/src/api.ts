@@ -1,0 +1,136 @@
+export type Category = 'strength' | 'cardio'
+
+export const CATEGORY_LABELS: Record<Category, string> = {
+  strength: 'Fuerza',
+  cardio: 'Cardio',
+}
+
+export interface WorkoutTypeRef {
+  id: number
+  name: string
+  category: Category
+}
+
+export interface WorkoutType extends WorkoutTypeRef {
+  session_count: number
+}
+
+export interface SessionSummary {
+  id: string
+  start_time: string
+  sport: string
+  duration_s: number
+  calories: number
+  hr_min: number
+  hr_avg: number
+  hr_max: number
+  workout_type: WorkoutTypeRef | null
+  sets: number | null
+  rests: number | null
+}
+
+export interface Segment {
+  kind: 'work' | 'rest'
+  start_s: number
+  end_s: number
+  duration_s: number
+  hr_start: number
+  hr_end: number
+  hr_avg: number
+  drop_30s: number | null
+  drop_60s: number | null
+}
+
+export interface HeartRatePoint {
+  t: number
+  hr: number
+}
+
+export interface SessionStats {
+  duration_s: number | null
+  hr_avg: number | null
+  hr_max: number | null
+  sets: number | null
+  avg_rest_s: number | null
+  recovery_30s: number | null
+  recovery_60s: number | null
+}
+
+export interface HistoryPoint extends SessionStats {
+  id: string
+  start_time: string
+}
+
+export interface Comparison extends SessionStats {
+  sessions: number
+}
+
+export interface Assessment {
+  headline: string
+  summary: string
+  strengths: string[]
+  improvements: string[]
+  advice: string
+  model: string
+  created_at: string
+}
+
+export interface SessionDetail extends SessionSummary {
+  device: string | null
+  threshold_bpm: number
+  segments: Segment[]
+  heart_rate: HeartRatePoint[]
+  stats: SessionStats
+  comparison: Comparison | null
+  history: HistoryPoint[]
+  assessment: Assessment | null
+}
+
+export interface WorkoutTypeInput {
+  name: string
+  category: Category
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, {
+    ...init,
+    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
+  })
+  if (!response.ok) {
+    // The API explains most errors in `detail`; fall back to the status code.
+    const body = await response.json().catch(() => null)
+    const detail = typeof body?.detail === 'string' ? body.detail : null
+    if (response.status === 404) throw new Error('No encontrado')
+    if (response.status === 409 && detail?.startsWith('A workout type named')) {
+      throw new Error('Ya existe un tipo con ese nombre')
+    }
+    throw new Error(detail ?? `Error ${response.status}`)
+  }
+  return (response.status === 204 ? undefined : await response.json()) as T
+}
+
+const send = <T>(method: string, path: string, body?: unknown) =>
+  request<T>(path, { method, body: body === undefined ? undefined : JSON.stringify(body) })
+
+export const fetchSessions = () => request<SessionSummary[]>('/api/sessions')
+
+export const fetchSession = (id: string) =>
+  request<SessionDetail>(`/api/sessions/${encodeURIComponent(id)}`)
+
+export const setSessionType = (id: string, workoutTypeId: number | null) =>
+  send<SessionDetail>('PUT', `/api/sessions/${encodeURIComponent(id)}/workout-type`, {
+    workout_type_id: workoutTypeId,
+  })
+
+export const requestAssessment = (id: string) =>
+  send<Assessment>('POST', `/api/sessions/${encodeURIComponent(id)}/assessment`)
+
+export const fetchWorkoutTypes = () => request<WorkoutType[]>('/api/workout-types')
+
+export const createWorkoutType = (input: WorkoutTypeInput) =>
+  send<WorkoutType>('POST', '/api/workout-types', input)
+
+export const updateWorkoutType = (id: number, input: WorkoutTypeInput) =>
+  send<WorkoutType>('PUT', `/api/workout-types/${id}`, input)
+
+export const deleteWorkoutType = (id: number) => send<void>('DELETE', `/api/workout-types/${id}`)

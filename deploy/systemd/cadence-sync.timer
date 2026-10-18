@@ -1,0 +1,9 @@
+[Unit]
+Description=cadence-ia: check iCloud for new workouts every 15 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+
+[Install]
+WantedBy=timers.target

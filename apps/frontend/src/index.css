@@ -521,3 +521,43 @@ small {
   display: flex;
   gap: 4px;
 }
+
+/* Comparisons */
+.stat-delta {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.compare-note {
+  margin-bottom: -12px;
+}
+
+.evolution {
+  padding: 16px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evolution h2 {
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.trend {
+  margin-top: 10px;
+}
+
+.trend h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.trend-chart {
+  width: 100%;
+  height: 150px;
+}

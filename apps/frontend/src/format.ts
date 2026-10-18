@@ -28,6 +28,13 @@ export function formatClock(seconds: number): string {
 /** 1773 -> "29 min" */
 export const formatMinutes = (seconds: number) => `${Math.round(seconds / 60)} min`
 
-export function average(values: number[]): number | null {
-  return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null
+const shortDateFormat = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' })
+
+/** "15 oct" */
+export const formatShortDate = (iso: string) => shortDateFormat.format(new Date(iso))
+
+/** 3.4 -> "+3", -0.2 -> "0" (sign always shown for non-zero values) */
+export function formatSigned(value: number): string {
+  const rounded = Math.round(value)
+  return rounded > 0 ? `+${rounded}` : rounded < 0 ? `−${Math.abs(rounded)}` : '0'
 }

@@ -46,11 +46,33 @@ export interface HeartRatePoint {
   hr: number
 }
 
+export interface SessionStats {
+  duration_s: number | null
+  hr_avg: number | null
+  hr_max: number | null
+  sets: number | null
+  avg_rest_s: number | null
+  recovery_30s: number | null
+  recovery_60s: number | null
+}
+
+export interface HistoryPoint extends SessionStats {
+  id: string
+  start_time: string
+}
+
+export interface Comparison extends SessionStats {
+  sessions: number
+}
+
 export interface SessionDetail extends SessionSummary {
   device: string | null
   threshold_bpm: number
   segments: Segment[]
   heart_rate: HeartRatePoint[]
+  stats: SessionStats
+  comparison: Comparison | null
+  history: HistoryPoint[]
 }
 
 export interface WorkoutTypeInput {

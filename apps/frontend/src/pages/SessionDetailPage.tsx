@@ -1,9 +1,17 @@
 import { lazy, Suspense, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { CATEGORY_LABELS, fetchSession, setSessionType, type SessionDetail } from '../api.ts'
+import {
+  CATEGORY_LABELS,
+  fetchSession,
+  setSessionType,
+  type SessionDetail,
+  type SessionStats,
+} from '../api.ts'
+import Evolution from '../components/Evolution.tsx'
 import SegmentList from '../components/SegmentList.tsx'
+import Stat from '../components/Stat.tsx'
 import TypePicker from '../components/TypePicker.tsx'
-import { average, formatClock, formatDay, formatTime } from '../format.ts'
+import { formatClock, formatDay, formatTime } from '../format.ts'
 import { useFetch } from '../useFetch.ts'
 
 // ECharts is heavy: load it only when a session is opened, not on the list.
@@ -33,9 +41,13 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
   const type = session.workout_type
   const isStrength = type?.category === 'strength'
 
-  const rests = session.segments.filter((s) => s.kind === 'rest')
-  const avgRest = average(rests.map((s) => s.duration_s))
-  const avgDrop = average(rests.flatMap((s) => (s.drop_60s === null ? [] : [s.drop_60s])))
+  const { stats, comparison: base } = session
+  // Difference with the average of previous sessions of this type, if any.
+  const delta = (key: keyof SessionStats, scale = 1) => {
+    const now = stats[key]
+    const before = base?.[key]
+    return now === null || before === null || before === undefined ? null : (now - before) / scale
+  }
 
   async function pick(typeId: number) {
     onChange(await setSessionType(session.id, typeId))
@@ -62,18 +74,30 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
         <TypePicker current={type} onPick={pick} onCancel={type ? () => setPicking(false) : undefined} />
       )}
 
+      {base && (
+        <p className="muted small compare-note">
+          Comparado con tu media de {base.sessions === 1 ? 'la sesión anterior' : `las ${base.sessions} anteriores`}{' '}
+          de {type?.name}
+        </p>
+      )}
       <section className="stat-grid" aria-label="Resumen">
-        <Stat label="Duración" value={formatClock(session.duration_s)} />
-        <Stat label="FC media" value={session.hr_avg} unit="ppm" />
-        <Stat label="FC máx." value={session.hr_max} unit="ppm" />
+        <Stat label="Duración" value={formatClock(session.duration_s)} delta={delta('duration_s', 60)} deltaUnit=" min" />
+        <Stat label="FC media" value={session.hr_avg} unit="ppm" delta={delta('hr_avg')} />
+        <Stat label="FC máx." value={session.hr_max} unit="ppm" delta={delta('hr_max')} />
         {isStrength && (
           <>
-            <Stat label="Series" value={session.sets ?? '–'} />
-            <Stat label="Descanso medio" value={avgRest === null ? '–' : formatClock(avgRest)} />
+            <Stat label="Series" value={session.sets ?? '–'} delta={delta('sets')} />
             <Stat
-              label="Recup. a 60 s"
-              value={avgDrop === null ? '–' : `−${Math.round(avgDrop)}`}
-              unit={avgDrop === null ? undefined : 'ppm'}
+              label="Descanso medio"
+              value={stats.avg_rest_s === null ? '–' : formatClock(stats.avg_rest_s)}
+              delta={delta('avg_rest_s')}
+              deltaUnit=" s"
+            />
+            <Stat
+              label="Recup. a 30 s"
+              value={stats.recovery_30s === null ? '–' : `−${Math.round(stats.recovery_30s)}`}
+              unit={stats.recovery_30s === null ? undefined : 'ppm'}
+              delta={delta('recovery_30s')}
             />
           </>
         )}
@@ -94,6 +118,8 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
         <p className="muted small">Pellizca para hacer zoom · {session.calories} kcal (estimadas)</p>
       </section>
 
+      <Evolution session={session} />
+
       {isStrength && (
         <section>
           <h2 className="section-title">Series y descansos</h2>
@@ -101,17 +127,5 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
         </section>
       )}
     </>
-  )
-}
-
-function Stat({ label, value, unit }: { label: string; value: string | number; unit?: string }) {
-  return (
-    <div className="card stat">
-      <p className="stat-label">{label}</p>
-      <p className="stat-value">
-        {value}
-        {unit && <small> {unit}</small>}
-      </p>
-    </div>
   )
 }

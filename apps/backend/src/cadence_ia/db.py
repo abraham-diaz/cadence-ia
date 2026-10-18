@@ -175,6 +175,31 @@ def get_segments(conn: sqlite3.Connection, session_id: str) -> list[sqlite3.Row]
     ).fetchall()
 
 
+STATS_QUERY = """
+    SELECT s.id, s.start_time, s.duration_s, s.hr_avg, s.hr_max, s.sets,
+           AVG(g.end_s - g.start_s) AS avg_rest_s,
+           AVG(g.drop_30s) AS recovery_30s,
+           AVG(g.drop_60s) AS recovery_60s
+    FROM sessions s
+    LEFT JOIN segments g ON g.session_id = s.id AND g.kind = 'rest'
+    WHERE {where}
+    GROUP BY s.id
+    ORDER BY s.start_time
+"""
+
+
+def session_stats(conn: sqlite3.Connection, session_id: str) -> sqlite3.Row | None:
+    """One session's numbers, including rest and recovery averages."""
+    return conn.execute(STATS_QUERY.format(where="s.id = ?"), (session_id,)).fetchone()
+
+
+def type_history(conn: sqlite3.Connection, type_id: int) -> list[sqlite3.Row]:
+    """The numbers of every session of a workout type, oldest first."""
+    return conn.execute(
+        STATS_QUERY.format(where="s.workout_type_id = ?"), (type_id,)
+    ).fetchall()
+
+
 def set_session_type(conn: sqlite3.Connection, session_id: str, type_id: int | None) -> bool:
     """Assign (or clear, with None) a session's workout type. False if no such session."""
     with conn:

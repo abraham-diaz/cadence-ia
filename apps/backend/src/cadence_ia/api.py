@@ -2,7 +2,7 @@
 
 import json
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from datetime import datetime
 from typing import Annotated, Literal
 
@@ -10,6 +10,7 @@ from fastapi import Depends, FastAPI, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from cadence_ia import db
+from cadence_ia.compare import STAT_FIELDS, baseline
 
 app = FastAPI(title="cadence-ia", version="0.1.0")
 
@@ -72,11 +73,36 @@ class SessionSummary(BaseModel):
     rests: int | None
 
 
+class SessionStats(BaseModel):
+    duration_s: float | None
+    hr_avg: float | None
+    hr_max: float | None
+    # Strength only:
+    sets: float | None
+    avg_rest_s: float | None
+    recovery_30s: float | None  # average HR drop 30 s into a rest
+    recovery_60s: float | None
+
+
+class HistoryPoint(SessionStats):
+    id: str
+    start_time: datetime
+
+
+class Comparison(SessionStats):
+    sessions: int  # how many previous sessions the averages come from
+
+
 class SessionDetail(SessionSummary):
     device: str | None
     threshold_bpm: float
     segments: list[SegmentOut]
     heart_rate: list[HeartRatePoint]
+    stats: SessionStats
+    # Average of the previous sessions of the same type; None if there are none.
+    comparison: Comparison | None
+    # Every session of the same type, oldest first (includes this one).
+    history: list[HistoryPoint]
 
 
 # --- Helpers ----------------------------------------------------------------
@@ -118,13 +144,38 @@ def _summary(row: sqlite3.Row) -> SessionSummary:
     )
 
 
+STRENGTH_ONLY = ("sets", "avg_rest_s", "recovery_30s", "recovery_60s")
+
+
+def _stats_fields(stats: Mapping, strength: bool) -> dict:
+    """Stat values, hiding the strength-only ones for other sessions."""
+    return {
+        name: stats[name] if strength or name not in STRENGTH_ONLY else None
+        for name in STAT_FIELDS
+    }
+
+
 def _detail(conn: sqlite3.Connection, session_id: str) -> SessionDetail:
     row = db.get_session(conn, session_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    segments = db.get_segments(conn, session_id) if _is_strength(row) else []
+    strength = _is_strength(row)
+    segments = db.get_segments(conn, session_id) if strength else []
+    history = db.type_history(conn, row["type_id"]) if row["type_id"] is not None else []
+    previous = baseline(history, session_id)
+
     return SessionDetail(
+        stats=SessionStats(**_stats_fields(db.session_stats(conn, session_id), strength)),
+        comparison=(
+            Comparison(sessions=previous["sessions"], **_stats_fields(previous, strength))
+            if previous
+            else None
+        ),
+        history=[
+            HistoryPoint(id=h["id"], start_time=h["start_time"], **_stats_fields(h, strength))
+            for h in history
+        ],
         **_summary(row).model_dump(),
         device=row["device"],
         threshold_bpm=row["threshold_bpm"],

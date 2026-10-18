@@ -9,6 +9,8 @@ description = "Personal training assistant that analyzes heart-rate data from Fi
 requires-python = ">=3.11"
 authors = [{name = "Abraham Díaz"}]
 
+[project.scripts]
+cadence-ia = "cadence_ia.cli:main"
 
 [project.optional-dependencies]
 dev = [

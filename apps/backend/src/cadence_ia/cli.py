@@ -8,6 +8,8 @@ import argparse
 import logging
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from cadence_ia import db
 from cadence_ia.ingest import data_dir, ingest
 from cadence_ia.metrics import analyze
@@ -73,6 +75,7 @@ def run_ingest(folder: Path, db_file: Path, force: bool) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
+    load_dotenv()  # same settings as the API (CADENCE_DB, CADENCE_DATA_DIR...)
 
     parser = argparse.ArgumentParser(prog="cadence-ia", description="Analyze TCX workouts.")
     commands = parser.add_subparsers(dest="command", required=True)

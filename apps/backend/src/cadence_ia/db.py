@@ -61,6 +61,15 @@ MIGRATIONS = [
     ALTER TABLE sessions
         ADD COLUMN workout_type_id INTEGER REFERENCES workout_types(id) ON DELETE SET NULL;
     """,
+    # 3: the LLM's written assessment of a session (one per session)
+    """
+    CREATE TABLE assessments (
+        session_id TEXT PRIMARY KEY REFERENCES sessions(id) ON DELETE CASCADE,
+        content    TEXT NOT NULL,         -- JSON produced by the model
+        model      TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+    """,
 ]
 
 
@@ -68,19 +77,52 @@ def db_path() -> Path:
     return Path(os.environ.get("CADENCE_DB", DEFAULT_DB_PATH)).expanduser()
 
 
+def _version(conn: sqlite3.Connection) -> int:
+    return conn.execute("PRAGMA user_version").fetchone()[0]
+
+
+def _statements(script: str) -> list[str]:
+    """Split a migration script into single SQL statements."""
+    statements, current = [], ""
+    for line in script.splitlines(keepends=True):
+        current += line
+        if sqlite3.complete_statement(current):
+            statements.append(current)
+            current = ""
+    return statements
+
+
 def migrate(conn: sqlite3.Connection) -> None:
-    """Apply the migrations this database hasn't seen yet."""
-    version = conn.execute("PRAGMA user_version").fetchone()[0]
-    for number, script in enumerate(MIGRATIONS[version:], start=version + 1):
-        # executescript commits on its own, so the version bump goes in the script.
-        conn.executescript(f"BEGIN;\n{script}\nPRAGMA user_version = {number};\nCOMMIT;")
+    """Apply the migrations this database hasn't seen yet.
+
+    Safe when several processes (API, ingest timer) or requests open the
+    database at the same time: the write lock is taken *before* reading the
+    version, so a second process waits and then sees the upgraded schema.
+    """
+    if _version(conn) == len(MIGRATIONS):
+        return  # up to date: the common case, no lock needed
+
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        version = _version(conn)  # read again, now that we hold the lock
+        for number, script in enumerate(MIGRATIONS[version:], start=version + 1):
+            for statement in _statements(script):
+                conn.execute(statement)
+            conn.execute(f"PRAGMA user_version = {number}")
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
 
 
 def connect(path: str | Path | None = None) -> sqlite3.Connection:
     """Open the database, creating the file and upgrading the schema if needed."""
     path = Path(path) if path else db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path)
+    # check_same_thread=False: FastAPI may open the connection in one worker
+    # thread and run the endpoint in another. Each request has its own
+    # connection and uses it one step at a time, so this is safe.
+    conn = sqlite3.connect(path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     migrate(conn)
@@ -260,3 +302,24 @@ def delete_type(conn: sqlite3.Connection, type_id: int) -> bool:
     with conn:
         cursor = conn.execute("DELETE FROM workout_types WHERE id = ?", (type_id,))
     return cursor.rowcount > 0
+
+
+# --- Assessments ------------------------------------------------------------
+
+def get_assessment(conn: sqlite3.Connection, session_id: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT content, model, created_at FROM assessments WHERE session_id = ?", (session_id,)
+    ).fetchone()
+
+
+def save_assessment(conn: sqlite3.Connection, session_id: str, content: str, model: str) -> None:
+    """Store a session's assessment, replacing the previous one."""
+    with conn:
+        conn.execute(
+            """INSERT INTO assessments (session_id, content, model, created_at)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT (session_id) DO UPDATE SET
+                   content = excluded.content, model = excluded.model,
+                   created_at = excluded.created_at""",
+            (session_id, content, model, datetime.now(timezone.utc).isoformat(timespec="seconds")),
+        )

@@ -7,6 +7,7 @@ import {
   type SessionDetail,
   type SessionStats,
 } from '../api.ts'
+import AssessmentCard from '../components/AssessmentCard.tsx'
 import Evolution from '../components/Evolution.tsx'
 import SegmentList from '../components/SegmentList.tsx'
 import Stat from '../components/Stat.tsx'
@@ -102,6 +103,14 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
           </>
         )}
       </section>
+
+      {type && (
+        <AssessmentCard
+          sessionId={session.id}
+          assessment={session.assessment}
+          onChange={(assessment) => onChange({ ...session, assessment })}
+        />
+      )}
 
       <section className="card chart-card">
         <div className="chart-head">

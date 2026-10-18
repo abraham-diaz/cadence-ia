@@ -11,6 +11,8 @@ authors = [{name = "Abraham Díaz"}]
 dependencies = [
     "fastapi",
     "uvicorn",
+    "google-genai",
+    "python-dotenv",
 ]
 
 [project.scripts]

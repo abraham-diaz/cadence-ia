@@ -65,6 +65,16 @@ export interface Comparison extends SessionStats {
   sessions: number
 }
 
+export interface Assessment {
+  headline: string
+  summary: string
+  strengths: string[]
+  improvements: string[]
+  advice: string
+  model: string
+  created_at: string
+}
+
 export interface SessionDetail extends SessionSummary {
   device: string | null
   threshold_bpm: number
@@ -73,6 +83,7 @@ export interface SessionDetail extends SessionSummary {
   stats: SessionStats
   comparison: Comparison | null
   history: HistoryPoint[]
+  assessment: Assessment | null
 }
 
 export interface WorkoutTypeInput {
@@ -86,9 +97,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
   })
   if (!response.ok) {
+    // The API explains most errors in `detail`; fall back to the status code.
+    const body = await response.json().catch(() => null)
+    const detail = typeof body?.detail === 'string' ? body.detail : null
     if (response.status === 404) throw new Error('No encontrado')
-    if (response.status === 409) throw new Error('Ya existe un tipo con ese nombre')
-    throw new Error(`Error ${response.status}`)
+    if (response.status === 409 && detail?.startsWith('A workout type named')) {
+      throw new Error('Ya existe un tipo con ese nombre')
+    }
+    throw new Error(detail ?? `Error ${response.status}`)
   }
   return (response.status === 204 ? undefined : await response.json()) as T
 }
@@ -105,6 +121,9 @@ export const setSessionType = (id: string, workoutTypeId: number | null) =>
   send<SessionDetail>('PUT', `/api/sessions/${encodeURIComponent(id)}/workout-type`, {
     workout_type_id: workoutTypeId,
   })
+
+export const requestAssessment = (id: string) =>
+  send<Assessment>('POST', `/api/sessions/${encodeURIComponent(id)}/assessment`)
 
 export const fetchWorkoutTypes = () => request<WorkoutType[]>('/api/workout-types')
 

@@ -2,15 +2,19 @@
 
 import json
 import sqlite3
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from datetime import datetime
 from typing import Annotated, Literal
 
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from cadence_ia import db
+from cadence_ia import assessment, db
 from cadence_ia.compare import STAT_FIELDS, baseline
+
+# Secrets such as GEMINI_API_KEY live in apps/backend/.env (never committed).
+load_dotenv()
 
 app = FastAPI(title="cadence-ia", version="0.1.0")
 
@@ -93,6 +97,11 @@ class Comparison(SessionStats):
     sessions: int  # how many previous sessions the averages come from
 
 
+class AssessmentOut(assessment.AssessmentContent):
+    model: str
+    created_at: datetime
+
+
 class SessionDetail(SessionSummary):
     device: str | None
     threshold_bpm: float
@@ -103,6 +112,7 @@ class SessionDetail(SessionSummary):
     comparison: Comparison | None
     # Every session of the same type, oldest first (includes this one).
     history: list[HistoryPoint]
+    assessment: AssessmentOut | None
 
 
 # --- Helpers ----------------------------------------------------------------
@@ -116,6 +126,14 @@ def get_db() -> Iterator[sqlite3.Connection]:
 
 
 Database = Annotated[sqlite3.Connection, Depends(get_db)]
+
+
+def get_assessor() -> Callable[[dict], assessment.AssessmentContent]:
+    """The function that writes assessments (replaced by a fake in the tests)."""
+    return assessment.generate
+
+
+Assessor = Annotated[Callable[[dict], assessment.AssessmentContent], Depends(get_assessor)]
 
 
 def _is_strength(row: sqlite3.Row) -> bool:
@@ -166,6 +184,7 @@ def _detail(conn: sqlite3.Connection, session_id: str) -> SessionDetail:
     previous = baseline(history, session_id)
 
     return SessionDetail(
+        assessment=_assessment(conn, session_id),
         stats=SessionStats(**_stats_fields(db.session_stats(conn, session_id), strength)),
         comparison=(
             Comparison(sessions=previous["sessions"], **_stats_fields(previous, strength))
@@ -188,6 +207,13 @@ def _detail(conn: sqlite3.Connection, session_id: str) -> SessionDetail:
         ],
         heart_rate=[HeartRatePoint(t=t, hr=hr) for t, hr in json.loads(row["heart_rate"])],
     )
+
+
+def _assessment(conn: sqlite3.Connection, session_id: str) -> AssessmentOut | None:
+    row = db.get_assessment(conn, session_id)
+    if row is None:
+        return None
+    return AssessmentOut(**json.loads(row["content"]), model=row["model"], created_at=row["created_at"])
 
 
 def _type_or_404(conn: sqlite3.Connection, type_id: int) -> WorkoutTypeOut:
@@ -225,6 +251,20 @@ def set_session_type(session_id: str, body: SessionTypeIn, conn: Database) -> Se
     if not db.set_session_type(conn, session_id, body.workout_type_id):
         raise HTTPException(status_code=404, detail="Session not found")
     return _detail(conn, session_id)
+
+
+@app.post("/api/sessions/{session_id}/assessment")
+def create_assessment(session_id: str, conn: Database, write: Assessor) -> AssessmentOut:
+    """Ask the LLM for a (new) assessment of the session and store it."""
+    detail = _detail(conn, session_id)
+    if detail.workout_type is None:
+        raise HTTPException(status_code=409, detail="Elige antes el tipo de entrenamiento")
+    try:
+        content = write(assessment.build_payload(detail.model_dump()))
+    except assessment.AssessmentUnavailable as err:
+        raise HTTPException(status_code=503, detail=str(err))
+    db.save_assessment(conn, session_id, content.model_dump_json(), assessment.model_name())
+    return _assessment(conn, session_id)
 
 
 @app.get("/api/workout-types")

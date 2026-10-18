@@ -53,3 +53,34 @@ def test_reingest_keeps_chosen_type(tmp_path):
     ingest(conn, folder, force=True)
     assert db.get_session(conn, "111")["type_name"] == "Pierna"
     conn.close()
+
+
+def test_concurrent_first_open_migrates_once(tmp_path):
+    """Several processes/requests opening a new database at once must not
+    re-run or undo migrations (it used to leave the version behind)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    db_file = tmp_path / "race.db"
+
+    def open_and_close(_):
+        db.connect(db_file).close()
+
+    for _ in range(5):
+        if db_file.exists():
+            db_file.unlink()
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            list(pool.map(open_and_close, range(8)))
+        conn = db.connect(db_file)
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == len(db.MIGRATIONS)
+        conn.close()
+
+
+def test_connection_can_be_used_from_another_thread(tmp_path):
+    """FastAPI may open the connection (dependency) and run the endpoint in
+    different worker threads; each request still uses it one step at a time."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    conn = db.connect(tmp_path / "threads.db")
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        assert pool.submit(db.list_sessions, conn).result() == []
+    conn.close()

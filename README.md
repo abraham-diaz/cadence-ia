@@ -194,6 +194,19 @@ sudo systemctl enable --now cadence-sync.timer cadence-backup.timer
 
 Then open `http://<pi-ip>:8000` on the phone and use *Share → Add to Home Screen*.
 
+#### Access from anywhere (Tailscale)
+
+To use the app away from home without exposing it to the internet, put the Pi and the phone in
+the same [Tailscale](https://tailscale.com) network, enable *HTTPS Certificates* in the Tailscale
+admin console (DNS page) and run:
+
+```bash
+sudo tailscale serve --bg 8000
+```
+
+The app is then available, with a valid HTTPS certificate, at
+`https://<pi-name>.<your-tailnet>.ts.net` from any device in your tailnet.
+
 The container runs as uid 1000 (the first user on Raspberry Pi OS / Debian). If your user has a
 different uid, build with `docker compose build --build-arg UID=$(id -u)`.
 
@@ -245,8 +258,8 @@ rclone config reconnect icloud:            # when the iCloud session expires
 - [x] **4. Mobile-first frontend**: session list and detail with the HR curve
 - [x] **5. SQLite history**: ingestion, workout types (CRUD) and comparisons between sessions
 - [x] **6. AI assessment** with Gemini, shown in the frontend
-- [ ] **7. Deployment on the Raspberry Pi**: Docker image serving API + frontend, rclone + ingest
-      timer, daily database backups
+- [x] **7. Deployment on the Raspberry Pi**: Docker image serving API + frontend, rclone + ingest
+      timer, daily database backups, HTTPS access from anywhere through Tailscale
 - [ ] Alerts when the rclone iCloud session expires (ntfy, Telegram…)
 - [ ] Cardio sessions: pace, per-km splits, smoothed elevation and a route map coloured by HR
 - [ ] Heart-rate zones once the max HR is known

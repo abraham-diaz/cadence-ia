@@ -131,3 +131,7 @@ def test_unknown_session_is_404(client):
 def test_empty_database(tmp_path, monkeypatch):
     monkeypatch.setenv("CADENCE_DB", str(tmp_path / "empty.db"))
     assert TestClient(app).get("/api/sessions").json() == []
+
+
+def test_api_responses_are_never_cached(client):
+    assert client.get("/api/sessions").headers["cache-control"] == "no-store"

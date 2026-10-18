@@ -4,7 +4,7 @@ import { formatDay, formatMinutes, formatTime } from '../format.ts'
 import { useFetch } from '../useFetch.ts'
 
 export default function SessionListPage() {
-  const { state } = useFetch(fetchSessions, 'sessions')
+  const { state, reload, refreshing } = useFetch(fetchSessions, 'sessions')
 
   return (
     <main className="page">
@@ -13,9 +13,22 @@ export default function SessionListPage() {
           <p className="eyebrow">Cadence</p>
           <h1>Entrenamientos</h1>
         </div>
-        <Link to="/tipos" className="button button-secondary button-small">
-          Tipos
-        </Link>
+        <div className="header-actions">
+          <button
+            type="button"
+            className="button button-secondary button-small icon-button"
+            onClick={reload}
+            disabled={refreshing}
+            aria-label="Actualizar"
+          >
+            <span className={refreshing ? 'spin' : ''} aria-hidden="true">
+              ↻
+            </span>
+          </button>
+          <Link to="/tipos" className="button button-secondary button-small">
+            Tipos
+          </Link>
+        </div>
       </header>
 
       {state.status === 'loading' && <p className="muted">Cargando…</p>}

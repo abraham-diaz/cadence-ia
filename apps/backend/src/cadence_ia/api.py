@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from cadence_ia import assessment, db
@@ -22,6 +22,15 @@ load_dotenv()
 app = FastAPI(title="cadence-ia", version="0.1.0")
 
 Category = Literal["strength", "cardio"]
+
+
+@app.middleware("http")
+async def no_cache_for_api(request: Request, call_next):
+    """API data changes (new workouts every 15 min): never let Safari reuse an old copy."""
+    response = await call_next(request)
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 # --- Models -----------------------------------------------------------------

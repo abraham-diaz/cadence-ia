@@ -4,13 +4,18 @@ import { formatDay, formatMinutes, formatTime } from '../format.ts'
 import { useFetch } from '../useFetch.ts'
 
 export default function SessionListPage() {
-  const state = useFetch(fetchSessions, 'sessions')
+  const { state } = useFetch(fetchSessions, 'sessions')
 
   return (
     <main className="page">
-      <header className="page-header">
-        <p className="eyebrow">Cadence</p>
-        <h1>Entrenamientos</h1>
+      <header className="page-header page-header-row">
+        <div>
+          <p className="eyebrow">Cadence</p>
+          <h1>Entrenamientos</h1>
+        </div>
+        <Link to="/tipos" className="button button-secondary button-small">
+          Tipos
+        </Link>
       </header>
 
       {state.status === 'loading' && <p className="muted">Cargando…</p>}
@@ -34,6 +39,8 @@ export default function SessionListPage() {
 }
 
 function SessionCard({ session }: { session: SessionSummary }) {
+  const type = session.workout_type
+
   return (
     <Link to={`/sesion/${session.id}`} className="card session-card">
       <div className="session-card-top">
@@ -47,6 +54,9 @@ function SessionCard({ session }: { session: SessionSummary }) {
           ›
         </span>
       </div>
+      <p className="session-type">
+        {type ? <span className="chip">{type.name}</span> : <span className="chip chip-pending">Sin clasificar</span>}
+      </p>
       <dl className="session-card-stats">
         <div>
           <dt>FC media</dt>
@@ -60,10 +70,19 @@ function SessionCard({ session }: { session: SessionSummary }) {
             {session.hr_max} <small>ppm</small>
           </dd>
         </div>
-        <div>
-          <dt>Series</dt>
-          <dd>{session.sets}</dd>
-        </div>
+        {session.sets !== null ? (
+          <div>
+            <dt>Series</dt>
+            <dd>{session.sets}</dd>
+          </div>
+        ) : (
+          <div>
+            <dt>Energía</dt>
+            <dd>
+              {session.calories} <small>kcal</small>
+            </dd>
+          </div>
+        )}
       </dl>
     </Link>
   )

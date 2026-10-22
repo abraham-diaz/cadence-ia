@@ -5,14 +5,8 @@ export type FetchState<T> =
   | { status: 'error'; error: string }
   | { status: 'ok'; data: T }
 
-/**
- * Run `load` once per `key` and track loading / error / data.
- * `reload` fetches again; `setData` replaces the data (e.g. with a PUT response).
- *
- * It also fetches again whenever the app comes back to the foreground: iOS
- * keeps home-screen apps in memory, so without this the list never showed
- * workouts that arrived while the app was in the background.
- */
+// Refetches when the app returns to the foreground: iOS keeps home-screen apps
+// in memory, so new workouts never showed up otherwise.
 export function useFetch<T>(load: () => Promise<T>, key: string) {
   const [state, setState] = useState<FetchState<T>>({ status: 'loading' })
   const [version, setVersion] = useState(0)

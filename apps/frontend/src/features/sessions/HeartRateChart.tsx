@@ -19,7 +19,7 @@ interface Props {
   segments: Segment[]
 }
 
-/** Read the theme colors defined as CSS variables in index.css. */
+/** Theme colors, defined as CSS variables in styles/tokens.css. */
 function themeColors() {
   const css = getComputedStyle(document.documentElement)
   const get = (name: string) => css.getPropertyValue(name).trim()

@@ -1,8 +1,4 @@
-"""Settings, read from the environment in one place.
-
-Secrets such as GEMINI_API_KEY live in apps/backend/.env (never committed);
-in Docker they come from docker-compose instead.
-"""
+"""The only place that reads the environment (and apps/backend/.env, never committed)."""
 
 import os
 from dataclasses import dataclass

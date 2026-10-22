@@ -1,5 +1,3 @@
-"""Sessions: list them, show one with its comparison, set its workout type."""
-
 import sqlite3
 from dataclasses import dataclass, replace
 

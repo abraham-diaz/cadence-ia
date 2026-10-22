@@ -1,5 +1,3 @@
-"""/api/sessions: list, detail, workout type and assessment."""
-
 from fastapi import APIRouter
 
 from cadence_ia.api.deps import AssessorDep, Database

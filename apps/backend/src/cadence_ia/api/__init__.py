@@ -1,5 +1,3 @@
-"""HTTP API: schemas and routes on top of the services."""
-
 from fastapi import APIRouter
 
 from cadence_ia.api.routes import health, sessions, workout_types

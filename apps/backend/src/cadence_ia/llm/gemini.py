@@ -1,5 +1,3 @@
-"""Gemini (Google) as the assessor, through the google-genai SDK."""
-
 import json
 from dataclasses import dataclass
 
@@ -12,7 +10,6 @@ class GeminiAssessor:
     model: str
 
     def __call__(self, payload: dict) -> AssessmentContent:
-        """Call Gemini and return its assessment."""
         if not self.api_key:
             raise AssessmentUnavailable("Falta la variable GEMINI_API_KEY en el servidor")
 

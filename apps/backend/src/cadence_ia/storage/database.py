@@ -1,11 +1,8 @@
-"""SQLite connection and schema migrations."""
-
 import sqlite3
 from pathlib import Path
 
-# Each entry upgrades the schema by one version. Never edit an entry once it
-# has been released: the database now holds user data (workout types), so it
-# can't simply be rebuilt from the TCX files. Append a new entry instead.
+# Never edit a released migration, append a new one: the database holds user data
+# (workout types, assessments) that can't be rebuilt from the TCX files.
 MIGRATIONS = [
     # 1: analyzed sessions and their work/rest segments
     """
@@ -82,11 +79,7 @@ def _statements(script: str) -> list[str]:
 
 def migrate(conn: sqlite3.Connection) -> None:
     """Apply the migrations this database hasn't seen yet.
-
-    Safe when several processes (API, ingest timer) or requests open the
-    database at the same time: the write lock is taken *before* reading the
-    version, so a second process waits and then sees the upgraded schema.
-    """
+    The write lock is taken before reading the version, so concurrent opens can't undo one."""
     if _version(conn) == len(MIGRATIONS):
         return  # up to date: the common case, no lock needed
 
@@ -107,9 +100,8 @@ def connect(path: str | Path) -> sqlite3.Connection:
     """Open the database, creating the file and upgrading the schema if needed."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    # check_same_thread=False: FastAPI may open the connection in one worker
-    # thread and run the endpoint in another. Each request has its own
-    # connection and uses it one step at a time, so this is safe.
+    # FastAPI may open the connection and run the endpoint in different threads;
+    # each request still uses its own connection one step at a time.
     conn = sqlite3.connect(path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

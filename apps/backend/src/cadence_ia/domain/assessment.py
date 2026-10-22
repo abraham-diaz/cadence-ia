@@ -1,5 +1,3 @@
-"""The written assessment of a session, as kept after the LLM answers."""
-
 from dataclasses import dataclass
 from datetime import datetime
 

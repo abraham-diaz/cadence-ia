@@ -1,5 +1,3 @@
-"""Workout types created by the user ("Pierna", "Caminata"...)."""
-
 from dataclasses import dataclass
 from typing import Literal
 

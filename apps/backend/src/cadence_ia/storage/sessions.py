@@ -1,5 +1,3 @@
-"""Analyzed sessions: summary, heart-rate curve, segments and stats."""
-
 import json
 import sqlite3
 from datetime import datetime, timezone

@@ -1,5 +1,3 @@
-"""Read Fitbit TCX workouts into domain objects."""
-
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path

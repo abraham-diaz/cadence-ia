@@ -1,5 +1,3 @@
-"""Ask the LLM to assess a session and keep its answer."""
-
 import sqlite3
 
 from cadence_ia.domain.assessment import Assessment

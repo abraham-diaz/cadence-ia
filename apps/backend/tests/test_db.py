@@ -101,6 +101,6 @@ def test_assessment_round_trip_keeps_accents(tmp_path):
     assert stored.model == "test-model"
     assert stored.created_at.tzinfo is not None
     raw = conn.execute("SELECT content FROM assessments").fetchone()[0]
-    assert "Sesión" in raw  # stored readable, not as ó escapes
+    assert "Sesión" in raw  # not escaped as \u00f3
     assert assessments.get_assessment(conn, "222") is None
     conn.close()

@@ -1,5 +1,3 @@
-"""/api/workout-types: the user's workout types."""
-
 from fastapi import APIRouter, Response
 
 from cadence_ia.api.deps import Database

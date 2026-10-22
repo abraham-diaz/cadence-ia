@@ -1,5 +1,3 @@
-"""Turn the use cases' errors into HTTP responses."""
-
 from fastapi import Request
 from fastapi.responses import JSONResponse
 

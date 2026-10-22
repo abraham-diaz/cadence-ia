@@ -1,5 +1,3 @@
-"""Workout types created by the user."""
-
 import sqlite3
 
 from cadence_ia.domain.workout_type import Category, WorkoutType, WorkoutTypeUsage

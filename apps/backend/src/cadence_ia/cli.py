@@ -1,10 +1,3 @@
-"""Command-line entry point.
-
-    cadence-ia show <file.tcx>     summarize one workout
-    cadence-ia ingest [--force]    store new TCX files in the database
-    cadence-ia openapi <file>      write the API schema (the frontend's types come from it)
-"""
-
 import argparse
 import json
 import logging
@@ -108,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "openapi":
         write_openapi(args.file)
         return 0
-    settings = Settings.from_env()  # same settings as the API
+    settings = Settings.from_env()
     return run_ingest(args.data_dir or settings.data_dir, args.db or settings.db_path, args.force)
 
 

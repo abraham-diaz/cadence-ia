@@ -1,4 +1,4 @@
-"""The dependency rule: the domain is pure Python and depends on nothing else."""
+"""Each layer only imports the layers below it."""
 
 import ast
 import sys

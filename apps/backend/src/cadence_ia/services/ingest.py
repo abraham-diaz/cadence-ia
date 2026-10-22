@@ -1,5 +1,3 @@
-"""Analyze new TCX files from the data folder and store them in the database."""
-
 import logging
 import sqlite3
 from dataclasses import dataclass, field
@@ -19,11 +17,8 @@ class IngestResult:
 
 
 def ingest(conn: sqlite3.Connection, folder: Path, force: bool = False) -> IngestResult:
-    """Store every TCX in `folder` that is not in the database yet.
-
-    With `force`, already stored files are analyzed again (useful after
-    improving the metrics). Broken files are logged and retried next run.
-    """
+    """Store the TCX files not in the database yet; `force` analyzes them all again.
+    Broken files are logged and retried on the next run."""
     result = IngestResult()
     known = sessions.session_ids(conn)
 

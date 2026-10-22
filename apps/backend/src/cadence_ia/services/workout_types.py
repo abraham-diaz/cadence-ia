@@ -1,5 +1,3 @@
-"""Workout types: create, rename, recategorize and delete them."""
-
 import sqlite3
 
 from cadence_ia.domain.workout_type import Category, WorkoutTypeUsage

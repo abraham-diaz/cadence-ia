@@ -1,7 +1,6 @@
 import type { ErrorCode } from './types.ts'
 
-// What the user reads for each error the API can return. `null` shows the
-// server's own message, already written for the user (e.g. Gemini's quota).
+// `null` shows the server's own message, already in Spanish (e.g. Gemini's quota).
 // Typed against the backend: a new error code won't compile until it's here.
 const ERROR_MESSAGES: Record<ErrorCode, string | null> = {
   session_not_found: 'No encontrado',

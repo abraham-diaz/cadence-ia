@@ -1,5 +1,3 @@
-"""What the API receives and returns, and how it is built from domain objects."""
-
 from dataclasses import asdict
 from datetime import datetime
 from typing import Literal
@@ -13,8 +11,6 @@ from cadence_ia.llm.assessor import AssessmentContent
 from cadence_ia.services import sessions
 from cadence_ia.services.errors import ErrorCode
 
-# --- Requests ---------------------------------------------------------------
-
 class WorkoutTypeIn(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
@@ -25,8 +21,6 @@ class WorkoutTypeIn(BaseModel):
 class SessionTypeIn(BaseModel):
     workout_type_id: int | None  # None clears the type
 
-
-# --- Responses --------------------------------------------------------------
 
 class WorkoutTypeRef(BaseModel):
     id: int
@@ -65,8 +59,7 @@ class SessionSummary(BaseModel):
     hr_avg: int
     hr_max: int
     workout_type: WorkoutTypeRef | None
-    # Only for strength sessions: sets/rests mean nothing until the user
-    # says the session was a strength workout.
+    # Only for strength sessions.
     sets: int | None
     rests: int | None
 
@@ -113,8 +106,6 @@ class ErrorOut(BaseModel):
     detail: str
     code: ErrorCode  # stable: the frontend shows a message for each code
 
-
-# --- From domain objects ----------------------------------------------------
 
 def workout_type_out(usage: WorkoutTypeUsage) -> WorkoutTypeOut:
     return WorkoutTypeOut(**asdict(usage.workout_type), session_count=usage.session_count)

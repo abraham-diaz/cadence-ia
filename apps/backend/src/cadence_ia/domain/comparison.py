@@ -19,7 +19,6 @@ class Stats:
     recovery_60s: float | None
 
     def without_strength(self) -> "Stats":
-        """These stats with the strength-only ones cleared."""
         return replace(self, **dict.fromkeys(STRENGTH_ONLY))
 
 
@@ -49,12 +48,8 @@ def _mean(values: list[float]) -> float | None:
 def baseline(
     history: Sequence[HistoryEntry], session_id: str, last: int = COMPARE_LAST
 ) -> Baseline | None:
-    """Average of the `last` sessions before `session_id` in `history` (oldest first).
-
-    Each field is averaged over the sessions that have a value for it, so a
-    session with no 60 s recovery doesn't drag that average down. Returns None
-    when there is nothing earlier to compare with.
-    """
+    """Average of the `last` sessions before `session_id` (history is oldest first).
+    Each field only counts the sessions that have it, so a missing value doesn't drag it down."""
     ids = [entry.id for entry in history]
     if session_id not in ids:
         return None

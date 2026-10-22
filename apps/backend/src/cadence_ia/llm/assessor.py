@@ -1,9 +1,5 @@
-"""What an assessment is and what the LLM receives, whichever LLM it is.
-
-Only the metrics are sent, as JSON: never the TCX file, GPS, device or file
-names. Keep it that way: on Gemini's free tier, Google may use what we send
-to improve its products.
-"""
+"""Privacy: only metrics are sent, never the TCX file, GPS, device or file names.
+On Gemini's free tier, Google may use what we send to improve its products."""
 
 from dataclasses import asdict
 from typing import Protocol
@@ -49,8 +45,6 @@ class AssessmentUnavailable(Exception):
 
 
 class Assessor(Protocol):
-    """Anything that turns the metrics payload into an assessment."""
-
     model: str  # stored with each assessment
 
     def __call__(self, payload: dict) -> AssessmentContent: ...

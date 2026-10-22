@@ -1,5 +1,3 @@
-"""Dependencies the routes ask for: settings, database connection, LLM."""
-
 import sqlite3
 from collections.abc import Iterator
 from typing import Annotated
@@ -31,7 +29,7 @@ Database = Annotated[sqlite3.Connection, Depends(get_db)]
 
 
 def get_assessor(settings: AppSettings) -> Assessor:
-    """The LLM that writes assessments (replaced by a fake in the tests)."""
+    """Replaced by a fake in the tests."""
     return GeminiAssessor(api_key=settings.gemini_api_key, model=settings.gemini_model)
 
 

@@ -88,12 +88,8 @@ def smooth(values: list[float], window: int) -> list[float]:
 
 
 def turning_points(values: list[float], threshold: float) -> list[tuple[int, str]]:
-    """Alternating valleys and peaks that differ by at least `threshold`.
-
-    Returns (index, "valley" | "peak") pairs. A turning point is only
-    confirmed once the signal moves back by `threshold`, so small wiggles
-    are ignored.
-    """
+    """Alternating (index, "valley" | "peak") pairs at least `threshold` apart.
+    A point is only confirmed once the signal moves back by `threshold`, so wiggles are ignored."""
     points: list[tuple[int, str]] = []
     direction = 0  # 1 rising, -1 falling, 0 not decided yet
     lo = hi = ext = 0

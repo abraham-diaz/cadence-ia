@@ -25,5 +25,4 @@ class Session:
 
     @property
     def is_strength(self) -> bool:
-        """Sets, rests and recovery only mean something in strength sessions."""
         return self.workout_type is not None and self.workout_type.is_strength

@@ -1,4 +1,4 @@
-/* Mobile-first styles. Colors are tokens so light and dark mode swap in one place. */
+/* Light and dark mode swap in one place: components only use these tokens. */
 
 :root {
   color-scheme: light;

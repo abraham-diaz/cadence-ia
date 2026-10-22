@@ -1,7 +1,4 @@
-"""Entry point of the web app: puts the pieces together.
-
-Run with: uvicorn cadence_ia.main:create_app --factory --reload
-"""
+"""Run with: uvicorn cadence_ia.main:create_app --factory --reload"""
 
 from fastapi import FastAPI, Request
 

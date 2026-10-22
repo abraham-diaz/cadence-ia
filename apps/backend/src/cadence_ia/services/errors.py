@@ -1,8 +1,5 @@
-"""Errors raised by the use cases. The API turns them into HTTP responses.
-
-`code` is stable and machine-readable: the frontend translates it into a
-message for the user. `message` is for whoever reads the API or the logs.
-"""
+"""`code` is stable: the frontend shows its own message for each one.
+`message` is for whoever reads the API or the logs."""
 
 from typing import Literal
 
@@ -23,7 +20,7 @@ class ServiceError(Exception):
 
 
 class NotFound(ServiceError):
-    """The session or workout type asked for doesn't exist."""
+    pass
 
 
 class InvalidInput(ServiceError):
@@ -31,7 +28,7 @@ class InvalidInput(ServiceError):
 
 
 class Conflict(ServiceError):
-    """The request clashes with the data as it is now."""
+    pass
 
 
 class Unavailable(ServiceError):

@@ -128,11 +128,12 @@ The interactive API docs are at <http://127.0.0.1:8000/docs>.
 ```bash
 cd apps/frontend
 npm install
-npm run dev
+npm run dev        # starts the API (uvicorn --reload) and Vite; Ctrl+C stops both
 ```
 
-Vite proxies `/api` to the backend on port 8000 and listens on the local network, so you can open
-`http://<your-pc-ip>:5173` from the phone.
+Open <http://localhost:5173>. `npm run dev` reuses an API already running on port 8000, and
+`npm run dev:web` starts only Vite. Vite proxies `/api` to port 8000 and listens on the local
+network, so you can open `http://<your-pc-ip>:5173` from the phone.
 
 ### Configuration
 

@@ -1,0 +1,70 @@
+/* AI assessment */
+.assessment {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.assessment h2 {
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+
+.assessment .eyebrow {
+  margin-bottom: -8px;
+}
+
+.assessment-headline {
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.assessment-subtitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.assessment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assessment-list li {
+  position: relative;
+  padding-left: 18px;
+}
+
+.assessment-list li::before {
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+.assessment-list-good li::before {
+  content: '+';
+  color: var(--text-secondary);
+}
+
+.assessment-list-improve li::before {
+  content: '→';
+  color: var(--text-secondary);
+}
+
+.assessment-advice {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface-pressed);
+}
+
+.assessment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}

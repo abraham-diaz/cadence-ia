@@ -2,18 +2,19 @@
 
     cadence-ia show <file.tcx>     summarize one workout
     cadence-ia ingest [--force]    store new TCX files in the database
+    cadence-ia openapi <file>      write the API schema (the frontend's types come from it)
 """
 
 import argparse
+import json
 import logging
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-from cadence_ia import db
-from cadence_ia.ingest import data_dir, ingest
-from cadence_ia.metrics import analyze
-from cadence_ia.tcx import parse_tcx
+from cadence_ia.config import Settings
+from cadence_ia.domain.heart_rate import analyze
+from cadence_ia.importers.tcx import parse_tcx
+from cadence_ia.services.ingest import ingest
+from cadence_ia.storage.database import connect
 
 
 def _mmss(seconds: int) -> str:
@@ -60,7 +61,7 @@ def run_ingest(folder: Path, db_file: Path, force: bool) -> int:
     if not folder.is_dir():
         print(f"Data folder not found: {folder}")
         return 1
-    conn = db.connect(db_file)
+    conn = connect(db_file)
     try:
         result = ingest(conn, folder, force=force)
     finally:
@@ -73,10 +74,16 @@ def run_ingest(folder: Path, db_file: Path, force: bool) -> int:
     return 1 if result.failed else 0
 
 
+def write_openapi(file: Path) -> None:
+    # Imported here: the other commands don't need to load the web app.
+    from cadence_ia.main import create_app
+
+    schema = create_app(Settings()).openapi()
+    file.write_text(json.dumps(schema, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
-    load_dotenv()  # same settings as the API (CADENCE_DB, CADENCE_DATA_DIR...)
-
     parser = argparse.ArgumentParser(prog="cadence-ia", description="Analyze TCX workouts.")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -91,11 +98,18 @@ def main(argv: list[str] | None = None) -> int:
     ingest_cmd.add_argument("--force", action="store_true",
                             help="analyze again files already stored")
 
+    openapi_cmd = commands.add_parser("openapi", help="write the API schema as JSON")
+    openapi_cmd.add_argument("file", type=Path, help="where to write it")
+
     args = parser.parse_args(argv)
     if args.command == "show":
         show(args.file)
         return 0
-    return run_ingest(args.data_dir or data_dir(), args.db or db.db_path(), args.force)
+    if args.command == "openapi":
+        write_openapi(args.file)
+        return 0
+    settings = Settings.from_env()  # same settings as the API
+    return run_ingest(args.data_dir or settings.data_dir, args.db or settings.db_path, args.force)
 
 
 if __name__ == "__main__":

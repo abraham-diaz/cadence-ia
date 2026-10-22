@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { fetchSession, setSessionType } from '../../api/sessions.ts'
 import type { SessionDetail, SessionStats } from '../../api/types.ts'
-import { formatClock, formatDay, formatTime } from '../../shared/format.ts'
+import { formatClock, formatDay, formatDrop, formatTime } from '../../shared/format.ts'
 import Stat from '../../shared/Stat.tsx'
 import { useFetch } from '../../shared/useFetch.ts'
 import AssessmentCard from '../assessment/AssessmentCard.tsx'
@@ -93,7 +93,7 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
             />
             <Stat
               label="Recup. a 30 s"
-              value={stats.recovery_30s === null ? '–' : `−${Math.round(stats.recovery_30s)}`}
+              value={stats.recovery_30s === null ? '–' : formatDrop(stats.recovery_30s)}
               unit={stats.recovery_30s === null ? undefined : 'ppm'}
               delta={delta('recovery_30s')}
             />

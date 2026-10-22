@@ -105,3 +105,15 @@ def test_analyze_sample_strength_session():
     assert 8 <= len(metrics.sets) <= 12
     kinds = [s.kind for s in metrics.segments]
     assert all(a != b for a, b in zip(kinds, kinds[1:]))  # work/rest alternate
+
+
+@pytest.mark.parametrize("name", ["8730973826466172504.tcx", "4529926065076776824.tcx"])
+def test_recovery_is_never_negative(name):
+    """A rest runs from a peak to the next valley, so HR can't end above where it started.
+    The frontend relies on it to show recovery as "↓6"."""
+    path = SAMPLE.parent / name
+    if not path.exists():
+        pytest.skip(f"{name} not available")
+    rests = analyze(parse_tcx(path)).rests
+    drops = [d for r in rests for d in (r.drop_30s, r.drop_60s) if d is not None]
+    assert drops and min(drops) >= 0

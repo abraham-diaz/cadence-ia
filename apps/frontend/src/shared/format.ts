@@ -33,6 +33,9 @@ const shortDateFormat = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month
 /** "15 oct" */
 export const formatShortDate = (iso: string) => shortDateFormat.format(new Date(iso))
 
+/** 6.4 -> "↓6": how much the HR dropped during a rest (never negative). */
+export const formatDrop = (bpm: number) => `↓${Math.round(bpm)}`
+
 /** 3.4 -> "+3", -0.2 -> "0" (sign always shown for non-zero values) */
 export function formatSigned(value: number): string {
   const rounded = Math.round(value)

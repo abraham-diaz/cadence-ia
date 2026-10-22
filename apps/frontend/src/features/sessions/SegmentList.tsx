@@ -1,5 +1,5 @@
 import type { Segment } from '../../api/types.ts'
-import { formatClock } from '../../shared/format.ts'
+import { formatClock, formatDrop } from '../../shared/format.ts'
 
 export default function SegmentList({ segments }: { segments: Segment[] }) {
   // Number only the sets: "Serie 1", "Descanso", "Serie 2", ...
@@ -33,7 +33,7 @@ export default function SegmentList({ segments }: { segments: Segment[] }) {
 
 function Recovery({ segment }: { segment: Segment }) {
   const parts = []
-  if (segment.drop_30s !== null) parts.push(`−${segment.drop_30s} a 30 s`)
-  if (segment.drop_60s !== null) parts.push(`−${segment.drop_60s} a 60 s`)
+  if (segment.drop_30s !== null) parts.push(`${formatDrop(segment.drop_30s)} a 30 s`)
+  if (segment.drop_60s !== null) parts.push(`${formatDrop(segment.drop_60s)} a 60 s`)
   return parts.length ? <p className="muted small">{parts.join(' · ')}</p> : null
 }

@@ -59,3 +59,11 @@ def delete_type(conn: sqlite3.Connection, type_id: int) -> bool:
     with conn:
         cursor = conn.execute("DELETE FROM workout_types WHERE id = ?", (type_id,))
     return cursor.rowcount > 0
+
+
+def find_by_name(conn: sqlite3.Connection, name: str) -> WorkoutType | None:
+    """Case-insensitive, like the UNIQUE constraint on the name."""
+    row = conn.execute(
+        "SELECT id, name, category FROM workout_types WHERE name = ? COLLATE NOCASE", (name,)
+    ).fetchone()
+    return WorkoutType(id=row["id"], name=row["name"], category=row["category"]) if row else None

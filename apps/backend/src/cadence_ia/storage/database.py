@@ -59,6 +59,38 @@ MIGRATIONS = [
         created_at TEXT NOT NULL
     );
     """,
+    # 4: training plans; only one is active, the old ones are kept for the history
+    """
+    CREATE TABLE plans (
+        id          INTEGER PRIMARY KEY,
+        title       TEXT NOT NULL,
+        weeks       INTEGER NOT NULL CHECK (weeks >= 1),  -- weeks that repeat in turn
+        cycle_start TEXT NOT NULL,        -- ISO date: the Monday the first week starts
+        created_at  TEXT NOT NULL,
+        active      INTEGER NOT NULL DEFAULT 1
+    );
+
+    CREATE UNIQUE INDEX plans_one_active ON plans(active) WHERE active = 1;
+
+    CREATE TABLE plan_days (
+        id              INTEGER PRIMARY KEY,
+        plan_id         INTEGER NOT NULL REFERENCES plans(id) ON DELETE CASCADE,
+        week            INTEGER NOT NULL,   -- 0 = first week of the cycle
+        weekday         INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 6),  -- 0 = Monday
+        workout_type_id INTEGER REFERENCES workout_types(id) ON DELETE SET NULL,
+        minutes         INTEGER NOT NULL,
+        note            TEXT
+    );
+
+    CREATE TABLE plan_exercises (
+        plan_day_id INTEGER NOT NULL REFERENCES plan_days(id) ON DELETE CASCADE,
+        position    INTEGER NOT NULL,
+        name        TEXT NOT NULL,
+        sets        INTEGER,
+        reps        TEXT,                 -- "10-12", "30 s"...
+        PRIMARY KEY (plan_day_id, position)
+    );
+    """,
 ]
 
 

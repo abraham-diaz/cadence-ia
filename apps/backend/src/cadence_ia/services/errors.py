@@ -9,6 +9,9 @@ ErrorCode = Literal[
     "duplicate_workout_type",
     "session_without_type",
     "assessment_unavailable",
+    "coach_unavailable",
+    "no_plan_in_chat",
+    "invalid_plan",
 ]
 
 

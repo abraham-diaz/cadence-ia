@@ -59,17 +59,25 @@ cadence-ia/
 ├── apps/
 │   ├── backend/
 │   │   ├── src/cadence_ia/
-│   │   │   ├── tcx.py         # TCX parser
-│   │   │   ├── metrics.py     # sets/rests detection and recovery
-│   │   │   ├── compare.py     # comparison with previous sessions
-│   │   │   ├── db.py          # SQLite schema, migrations and queries
-│   │   │   ├── ingest.py      # store new TCX files in the database
-│   │   │   ├── assessment.py  # LLM assessment (Gemini)
-│   │   │   ├── api.py         # FastAPI app
-│   │   │   ├── frontend.py    # serves the built React app
-│   │   │   └── cli.py         # `cadence-ia` command
+│   │   │   ├── domain/        # pure workout logic: activity, HR analysis, comparison
+│   │   │   ├── importers/     # file formats → domain objects (TCX)
+│   │   │   ├── storage/       # SQLite: migrations and one module per kind of record
+│   │   │   ├── llm/           # what the LLM receives, and Gemini behind an interface
+│   │   │   ├── services/      # use cases: ingest, session detail, assess...
+│   │   │   ├── api/           # FastAPI: schemas, errors and one module per route group
+│   │   │   ├── config.py      # settings, read from the environment in one place
+│   │   │   ├── main.py        # builds the web app (`create_app`)
+│   │   │   ├── cli.py         # `cadence-ia` command
+│   │   │   └── frontend.py    # serves the built React app
 │   │   └── tests/
 │   └── frontend/              # React + Vite + TypeScript PWA
+│       ├── openapi.json       # the API schema, exported by the backend
+│       └── src/
+│           ├── api/           # HTTP client, error messages, generated types
+│           ├── features/      # sessions, workout-types, assessment (pages, components, CSS)
+│           ├── shared/        # pieces used by several features
+│           ├── styles/        # design tokens, base styles, shared controls
+│           └── app/           # routes
 ├── deploy/
 │   ├── sync.sh                # rclone copy + ingest
 │   ├── backup.sh              # daily SQLite backup
@@ -77,6 +85,20 @@ cadence-ia/
 ├── Dockerfile                 # builds the frontend, then the Python image
 └── docker-compose.yml
 ```
+
+### Backend layers
+
+Each layer only imports the ones below it, and `tests/test_architecture.py` enforces it:
+
+```
+api, cli  →  services  →  storage, llm, importers  →  domain
+```
+
+- **domain** is plain Python: no database, HTTP, files or LLM, so it can be tested on its own.
+- **storage** returns domain objects, never raw SQLite rows.
+- **services** hold the rules ("sets only show in strength sessions", "only typed sessions can be
+  assessed") and raise errors with a stable `code`; the API turns them into HTTP responses.
+- **api** routes only translate between HTTP and the services.
 
 ## Getting started (development)
 
@@ -96,7 +118,7 @@ Store your TCX files in the database, then start the API:
 
 ```bash
 cadence-ia ingest                  # reads CADENCE_DATA_DIR, writes CADENCE_DB
-uvicorn cadence_ia.api:app --reload
+uvicorn cadence_ia.main:create_app --factory --reload
 ```
 
 The interactive API docs are at <http://127.0.0.1:8000/docs>.
@@ -133,13 +155,27 @@ For development, point them to the repo, e.g. `CADENCE_DATA_DIR=tests/data` and
 cadence-ia show path/to/workout.tcx   # print a summary and the sets/rests table
 cadence-ia ingest                     # store new TCX files in the database
 cadence-ia ingest --force             # re-analyze every file (keeps your workout types)
+cadence-ia openapi <file>             # write the API schema as JSON
 ```
+
+### API types in the frontend
+
+The frontend's TypeScript types are generated from the API, so they can't drift apart. After
+changing the API:
+
+```bash
+cd apps/backend && cadence-ia openapi ../frontend/openapi.json
+cd apps/frontend && npm run gen:api   # writes src/api/schema.d.ts
+```
+
+A backend test fails if `openapi.json` is out of date. Errors carry a `code`; the message shown
+for each one lives in `src/api/client.ts`, and a new code won't compile until it has one.
 
 ### Tests
 
 ```bash
 cd apps/backend && pytest             # backend
-cd apps/frontend && npm run lint      # frontend
+cd apps/frontend && npm run lint && npx tsc -b   # frontend
 ```
 
 The tests build synthetic TCX files, so they run without any personal data. A few extra tests use
@@ -248,7 +284,8 @@ rclone config reconnect icloud:            # when the iCloud session expires
   only sends aggregated metrics (type, duration, HR, sets, recovery): no GPS, device, file names or
   personal data.
 - **Database migrations:** the database stores user data (workout types, assessments), so schema
-  changes are versioned migrations in `db.py` (`PRAGMA user_version`), never a rebuild.
+  changes are versioned migrations in `storage/database.py` (`PRAGMA user_version`), never a
+  rebuild.
 
 ## Roadmap
 

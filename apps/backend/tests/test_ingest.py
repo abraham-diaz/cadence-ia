@@ -1,12 +1,12 @@
-import json
 from datetime import datetime
 
 import pytest
 from conftest import sets_curve, write_sample_folder, write_tcx
 
-from cadence_ia import db
 from cadence_ia.cli import main
-from cadence_ia.ingest import ingest
+from cadence_ia.services.ingest import ingest
+from cadence_ia.storage import sessions
+from cadence_ia.storage.database import connect
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def folder(tmp_path):
 
 @pytest.fixture
 def conn(tmp_path):
-    connection = db.connect(tmp_path / "test.db")
+    connection = connect(tmp_path / "test.db")
     yield connection
     connection.close()
 
@@ -28,7 +28,7 @@ def test_ingest_adds_new_files_and_reports_broken(conn, folder):
     result = ingest(conn, folder)
     assert result.added == ["111", "222"]
     assert result.failed == ["broken.tcx"]
-    assert db.session_ids(conn) == {"111", "222"}
+    assert sessions.session_ids(conn) == {"111", "222"}
 
 
 def test_ingest_skips_files_already_stored(conn, folder):
@@ -44,22 +44,22 @@ def test_force_reanalyzes_without_duplicates(conn, folder):
     ingest(conn, folder)
     result = ingest(conn, folder, force=True)
     assert result.added == ["111", "222"]
-    assert len(db.list_sessions(conn)) == 2
+    assert len(sessions.list_sessions(conn)) == 2
     segments = conn.execute("SELECT COUNT(*) FROM segments WHERE session_id = '111'").fetchone()[0]
-    assert segments == len(db.get_segments(conn, "111"))
+    assert segments == len(sessions.get_segments(conn, "111"))
 
 
 def test_stored_session_round_trip(conn, folder):
     ingest(conn, folder)
-    row = db.get_session(conn, "222")
-    assert row["start_time"] == "2026-10-03T18:00:00+02:00"
-    assert row["device"] == "Test Device"
-    assert row["sets"] == 3
-    assert row["hr_min"] == 100 and row["hr_max"] == 140
-    heart_rate = json.loads(row["heart_rate"])
-    assert heart_rate[0] == [0.0, 100]
+    session = sessions.get_session(conn, "222")
+    assert session.start_time.isoformat() == "2026-10-03T18:00:00+02:00"  # offset kept
+    assert session.device == "Test Device"
+    assert session.sets == 3
+    assert session.hr_min == 100 and session.hr_max == 140
+    heart_rate = sessions.get_heart_rate(conn, "222")
+    assert heart_rate[0] == (0.0, 100)
     assert len(heart_rate) == len(sets_curve(3))
-    kinds = [s["kind"] for s in db.get_segments(conn, "222")]
+    kinds = [s.kind for s in sessions.get_segments(conn, "222")]
     assert kinds[:2] == ["work", "rest"]
 
 

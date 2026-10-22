@@ -3,6 +3,7 @@ import { fetchSessions } from '../../api/sessions.ts'
 import type { SessionSummary } from '../../api/types.ts'
 import { formatDay, formatMinutes, formatTime } from '../../shared/format.ts'
 import { useFetch } from '../../shared/useFetch.ts'
+import PlanDivider from '../plans/PlanDivider.tsx'
 import './sessions.css'
 
 export default function SessionListPage() {
@@ -49,6 +50,7 @@ export default function SessionListPage() {
           ))}
         </ul>
       )}
+      <PlanDivider />
     </main>
   )
 }

@@ -36,7 +36,7 @@ export default function WorkoutTypeForm({ initial, submitLabel, onSubmit, onCanc
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Nombre, p. ej. Pierna"
-        maxLength={40}
+        maxLength={60}
         aria-label="Nombre del tipo"
         autoFocus
       />

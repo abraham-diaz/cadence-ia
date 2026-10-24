@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter
 
 from cadence_ia.api.deps import CoachDep, Database, PlanExtractorDep
@@ -9,9 +11,11 @@ from cadence_ia.api.schemas import (
     PlanIn,
     PlanOut,
     PlanProposalOut,
+    WeekProgressOut,
     WeekSummaryOut,
     plan_out,
     proposal_out,
+    week_progress_out,
 )
 from cadence_ia.domain.plan import Exercise
 from cadence_ia.llm.coach import ChatMessage
@@ -70,3 +74,10 @@ def current_plan(conn: Database) -> PlanOut | None:
     """The active plan, with the week of the cycle we are in today; null if there is none."""
     current = plans.get_current(conn)
     return plan_out(current) if current else None
+
+
+@router.get("/week-progress")
+def week_progress(conn: Database, start: date | None = None) -> WeekProgressOut:
+    """A week, Monday to Sunday: what the plan in force asked for and what was trained.
+    `start` is any day of the week wanted; without it, this week."""
+    return week_progress_out(plans.week(conn, start))

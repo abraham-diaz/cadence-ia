@@ -636,6 +636,57 @@
           }
         }
       }
+    },
+    "/api/plans/week-progress": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Week Progress",
+        "description": "A week, Monday to Sunday: what the plan in force asked for and what was trained.\n`start` is any day of the week wanted; without it, this week.",
+        "operationId": "week_progress_api_plans_week_progress_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekProgressOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -833,6 +884,49 @@
           "messages"
         ],
         "title": "ConversationIn"
+      },
+      "DayProgressOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "partial",
+              "missed",
+              "pending",
+              "rest",
+              "extra"
+            ],
+            "title": "Status"
+          },
+          "planned": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedWorkoutOut"
+            },
+            "type": "array",
+            "title": "Planned"
+          },
+          "session_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Session Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "status",
+          "planned",
+          "session_ids"
+        ],
+        "title": "DayProgressOut"
       },
       "ErrorOut": {
         "properties": {
@@ -1339,6 +1433,65 @@
           "days"
         ],
         "title": "PlanProposalOut"
+      },
+      "PlannedWorkoutOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "workout_type",
+          "minutes",
+          "note",
+          "exercises",
+          "done"
+        ],
+        "title": "PlannedWorkoutOut"
       },
       "ProposedDayOut": {
         "properties": {
@@ -1866,6 +2019,84 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WeekProgressOut": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "plan_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Week"
+          },
+          "plan_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Weeks"
+          },
+          "planned_sessions": {
+            "type": "integer",
+            "title": "Planned Sessions"
+          },
+          "done_sessions": {
+            "type": "integer",
+            "title": "Done Sessions"
+          },
+          "planned_minutes": {
+            "type": "integer",
+            "title": "Planned Minutes"
+          },
+          "done_minutes": {
+            "type": "integer",
+            "title": "Done Minutes"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayProgressOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "plan_title",
+          "plan_week",
+          "plan_weeks",
+          "planned_sessions",
+          "done_sessions",
+          "planned_minutes",
+          "done_minutes",
+          "days"
+        ],
+        "title": "WeekProgressOut"
       },
       "WeekSummaryOut": {
         "properties": {

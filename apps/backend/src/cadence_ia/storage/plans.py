@@ -44,8 +44,16 @@ def save_plan(
 
 def get_active_plan(conn: sqlite3.Connection) -> Plan | None:
     row = conn.execute("SELECT * FROM plans WHERE active = 1").fetchone()
-    if row is None:
-        return None
+    return _plan(conn, row) if row else None
+
+
+def list_plans(conn: sqlite3.Connection) -> list[Plan]:
+    """Every version of the plan, oldest first: editing a plan keeps the old one."""
+    rows = conn.execute("SELECT * FROM plans ORDER BY created_at, id").fetchall()
+    return [_plan(conn, row) for row in rows]
+
+
+def _plan(conn: sqlite3.Connection, row: sqlite3.Row) -> Plan:
     return Plan(
         id=row["id"],
         title=row["title"],

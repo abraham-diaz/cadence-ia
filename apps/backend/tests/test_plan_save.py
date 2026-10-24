@@ -296,3 +296,38 @@ def test_deleting_a_type_keeps_the_plan_day(client, conn):
     walk = client.get("/api/plans/current").json()["days"][1]
     assert walk["workout_type"] is None
     assert walk["minutes"] == 35
+
+
+# This week's progress
+
+
+def test_week_progress_without_a_plan(client):
+    progress = client.get("/api/plans/week-progress").json()
+    assert progress["plan_title"] is None
+    assert len(progress["days"]) == 7
+    assert date.fromisoformat(progress["start"]).weekday() == 0
+    assert {d["status"] for d in progress["days"]} <= {"rest", "extra"}
+
+
+def test_week_progress_follows_the_saved_plan(client, conn):
+    client.post("/api/plans", json=plan_body(conn))
+    progress = client.get("/api/plans/week-progress").json()
+    assert progress["plan_title"] == "Perder peso"
+    assert (progress["plan_week"], progress["plan_weeks"]) == (0, 2)
+
+    # Saved today: only today and the days after it ask for something.
+    today = date.today().weekday()
+    planned = [d for d in progress["days"] if d["planned"]]
+    assert [date.fromisoformat(d["date"]).weekday() for d in planned] == [
+        weekday for weekday in (1, 2) if weekday >= today
+    ]
+    for day in planned:
+        assert day["status"] == "pending"
+        assert day["planned"][0]["done"] is False
+
+
+def test_week_progress_of_another_week(client):
+    response = client.get("/api/plans/week-progress", params={"start": "2026-10-15"})
+    assert response.status_code == 200
+    assert response.json()["start"] == "2026-10-12"
+    assert client.get("/api/plans/week-progress", params={"start": "ayer"}).status_code == 422

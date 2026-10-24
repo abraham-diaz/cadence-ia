@@ -228,6 +228,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/week-progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Week Progress
+         * @description A week, Monday to Sunday: what the plan in force asked for and what was trained.
+         *     `start` is any day of the week wanted; without it, this week.
+         */
+        get: operations["week_progress_api_plans_week_progress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -300,6 +321,23 @@ export interface components {
         ConversationIn: {
             /** Messages */
             messages: components["schemas"]["ChatMessageIn"][];
+        };
+        /** DayProgressOut */
+        DayProgressOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "done" | "partial" | "missed" | "pending" | "rest" | "extra";
+            /** Planned */
+            planned: components["schemas"]["PlannedWorkoutOut"][];
+            /** Session Ids */
+            session_ids: string[];
         };
         /** ErrorOut */
         ErrorOut: {
@@ -451,6 +489,22 @@ export interface components {
             /** Days */
             days: components["schemas"]["ProposedDayOut"][];
         };
+        /** PlannedWorkoutOut */
+        PlannedWorkoutOut: {
+            /** Week */
+            week: number;
+            /** Weekday */
+            weekday: number;
+            workout_type: components["schemas"]["WorkoutTypeRef"] | null;
+            /** Minutes */
+            minutes: number;
+            /** Note */
+            note: string | null;
+            /** Exercises */
+            exercises: components["schemas"]["ExerciseOut"][];
+            /** Done */
+            done: boolean;
+        };
         /** ProposedDayOut */
         ProposedDayOut: {
             /** Week */
@@ -598,6 +652,30 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WeekProgressOut */
+        WeekProgressOut: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /** Plan Title */
+            plan_title: string | null;
+            /** Plan Week */
+            plan_week: number | null;
+            /** Plan Weeks */
+            plan_weeks: number | null;
+            /** Planned Sessions */
+            planned_sessions: number;
+            /** Done Sessions */
+            done_sessions: number;
+            /** Planned Minutes */
+            planned_minutes: number;
+            /** Done Minutes */
+            done_minutes: number;
+            /** Days */
+            days: components["schemas"]["DayProgressOut"][];
         };
         /** WeekSummaryOut */
         WeekSummaryOut: {
@@ -1148,6 +1226,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanOut"] | null;
+                };
+            };
+        };
+    };
+    week_progress_api_plans_week_progress_get: {
+        parameters: {
+            query?: {
+                start?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeekProgressOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

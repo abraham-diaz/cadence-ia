@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 
 from cadence_ia.domain.plan import Exercise, Plan, PlanDay, cycle_start
+from cadence_ia.domain.week_progress import WeekProgress, week_progress
 from cadence_ia.domain.week_summary import week_summary
 from cadence_ia.domain.workout_type import Category, WorkoutType
 from cadence_ia.llm.coach import ChatMessage, Coach, build_context
@@ -148,6 +149,15 @@ def get_current(conn: sqlite3.Connection, today: date | None = None) -> CurrentP
     if plan is None:
         return None
     return CurrentPlan(plan=plan, week=plan.week_on(today or date.today()))
+
+
+def week(
+    conn: sqlite3.Connection, start: date | None = None, today: date | None = None
+) -> WeekProgress:
+    """A week (this one by default), day by day, against the plan in force each day."""
+    return week_progress(
+        plans.list_plans(conn), sessions.list_sessions(conn), today or date.today(), start
+    )
 
 
 def _category(value: str) -> Category:

@@ -5,7 +5,9 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from cadence_ia.domain.assessment import Assessment
+from cadence_ia.domain.plan import PlanDay
 from cadence_ia.domain.session import Session
+from cadence_ia.domain.week_progress import DayStatus, WeekProgress
 from cadence_ia.domain.workout_type import Category, WorkoutTypeUsage
 from cadence_ia.llm.assessor import AssessmentContent
 from cadence_ia.services import plans, sessions
@@ -205,6 +207,29 @@ class PlanOut(BaseModel):
     days: list[PlanDayOut]
 
 
+class PlannedWorkoutOut(PlanDayOut):
+    done: bool  # a session of this type was trained that day
+
+
+class DayProgressOut(BaseModel):
+    date: date
+    status: DayStatus
+    planned: list[PlannedWorkoutOut]
+    session_ids: list[str]
+
+
+class WeekProgressOut(BaseModel):
+    start: date  # Monday
+    plan_title: str | None  # the plan in force that week; null if there was none
+    plan_week: int | None
+    plan_weeks: int | None
+    planned_sessions: int
+    done_sessions: int
+    planned_minutes: int
+    done_minutes: int  # every session of the week counts, planned or not
+    days: list[DayProgressOut]
+
+
 class ErrorOut(BaseModel):
     detail: str
     code: ErrorCode  # stable: the frontend shows a message for each code
@@ -282,15 +307,41 @@ def plan_out(current: plans.CurrentPlan) -> PlanOut:
         cycle_start=plan.cycle_start,
         created_at=plan.created_at,
         current_week=current.week,
+        days=[PlanDayOut(**_plan_day_fields(day)) for day in plan.days],
+    )
+
+
+def week_progress_out(progress: WeekProgress) -> WeekProgressOut:
+    plan = progress.plan
+    return WeekProgressOut(
+        start=progress.start,
+        plan_title=plan.title if plan else None,
+        plan_week=progress.plan_week,
+        plan_weeks=plan.weeks if plan else None,
+        planned_sessions=progress.planned_sessions,
+        done_sessions=progress.done_sessions,
+        planned_minutes=progress.planned_minutes,
+        done_minutes=progress.done_minutes,
         days=[
-            PlanDayOut(
-                week=day.week,
-                weekday=day.weekday,
-                workout_type=WorkoutTypeRef(**asdict(day.workout_type)) if day.workout_type else None,
-                minutes=day.minutes,
-                note=day.note,
-                exercises=[ExerciseOut(**asdict(e)) for e in day.exercises],
+            DayProgressOut(
+                date=day.date,
+                status=day.status,
+                planned=[
+                    PlannedWorkoutOut(**_plan_day_fields(p.day), done=p.done) for p in day.planned
+                ],
+                session_ids=[s.id for s in day.sessions],
             )
-            for day in plan.days
+            for day in progress.days
         ],
     )
+
+
+def _plan_day_fields(day: PlanDay) -> dict:
+    return {
+        "week": day.week,
+        "weekday": day.weekday,
+        "workout_type": WorkoutTypeRef(**asdict(day.workout_type)) if day.workout_type else None,
+        "minutes": day.minutes,
+        "note": day.note,
+        "exercises": [ExerciseOut(**asdict(e)) for e in day.exercises],
+    }

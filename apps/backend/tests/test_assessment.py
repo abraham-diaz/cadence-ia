@@ -7,7 +7,8 @@ from fastapi.testclient import TestClient
 
 from cadence_ia.api.deps import get_assessor
 from cadence_ia.config import Settings
-from cadence_ia.llm.assessor import AssessmentContent, AssessmentUnavailable
+from cadence_ia.llm.assessor import AssessmentContent
+from cadence_ia.llm.errors import LLMUnavailable
 from cadence_ia.llm.gemini import GeminiAssessor
 from cadence_ia.main import create_app
 from cadence_ia.services.ingest import ingest
@@ -34,7 +35,7 @@ class FakeAssessor:
     def __call__(self, payload: dict) -> AssessmentContent:
         self.calls.append(payload)
         if self.error:
-            raise AssessmentUnavailable(self.error)
+            raise LLMUnavailable(self.error)
         return FAKE
 
 
@@ -114,7 +115,7 @@ def test_llm_unavailable_is_503(client, assessor):
 
 
 def test_missing_api_key():
-    with pytest.raises(AssessmentUnavailable, match="GEMINI_API_KEY"):
+    with pytest.raises(LLMUnavailable, match="GEMINI_API_KEY"):
         GeminiAssessor(api_key=None, model="test-model")({})
 
 

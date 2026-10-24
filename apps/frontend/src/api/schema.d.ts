@@ -128,6 +128,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Chat
+         * @description Send the whole conversation and get the coach's next reply.
+         */
+        post: operations["chat_api_plans_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/week-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Week Summary
+         * @description The last 7 days written as a chat message. The user decides whether to send it.
+         */
+        get: operations["week_summary_api_plans_week_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Propose
+         * @description Read the plan agreed in the chat, for the user to review. Nothing is saved.
+         */
+        post: operations["propose_api_plans_proposal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save Plan
+         * @description Save the reviewed plan as the current one, creating its new workout types.
+         */
+        post: operations["save_plan_api_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Current Plan
+         * @description The active plan, with the week of the cycle we are in today; null if there is none.
+         */
+        get: operations["current_plan_api_plans_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/week-progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Week Progress
+         * @description A week, Monday to Sunday: what the plan in force asked for and what was trained.
+         *     `start` is any day of the week wanted; without it, this week.
+         */
+        get: operations["week_progress_api_plans_week_progress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -167,6 +288,16 @@ export interface components {
              */
             created_at: string;
         };
+        /** ChatMessageIn */
+        ChatMessageIn: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "model";
+            /** Text */
+            text: string;
+        };
         /** Comparison */
         Comparison: {
             /** Duration S */
@@ -186,6 +317,28 @@ export interface components {
             /** Sessions */
             sessions: number;
         };
+        /** ConversationIn */
+        ConversationIn: {
+            /** Messages */
+            messages: components["schemas"]["ChatMessageIn"][];
+        };
+        /** DayProgressOut */
+        DayProgressOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "done" | "partial" | "missed" | "pending" | "rest" | "extra";
+            /** Planned */
+            planned: components["schemas"]["PlannedWorkoutOut"][];
+            /** Session Ids */
+            session_ids: string[];
+        };
         /** ErrorOut */
         ErrorOut: {
             /** Detail */
@@ -194,7 +347,25 @@ export interface components {
              * Code
              * @enum {string}
              */
-            code: "session_not_found" | "workout_type_not_found" | "duplicate_workout_type" | "session_without_type" | "assessment_unavailable";
+            code: "session_not_found" | "workout_type_not_found" | "duplicate_workout_type" | "session_without_type" | "assessment_unavailable" | "coach_unavailable" | "no_plan_in_chat" | "invalid_plan";
+        };
+        /** ExerciseIn */
+        ExerciseIn: {
+            /** Name */
+            name: string;
+            /** Sets */
+            sets?: number | null;
+            /** Reps */
+            reps?: string | null;
+        };
+        /** ExerciseOut */
+        ExerciseOut: {
+            /** Name */
+            name: string;
+            /** Sets */
+            sets: number | null;
+            /** Reps */
+            reps: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -231,6 +402,130 @@ export interface components {
              * Format: date-time
              */
             start_time: string;
+        };
+        /** PlanChatIn */
+        PlanChatIn: {
+            /** Messages */
+            messages: components["schemas"]["ChatMessageIn"][];
+        };
+        /** PlanChatOut */
+        PlanChatOut: {
+            /** Reply */
+            reply: string;
+        };
+        /** PlanDayIn */
+        PlanDayIn: {
+            /** Week */
+            week: number;
+            /** Weekday */
+            weekday: number;
+            /** Workout Type Id */
+            workout_type_id?: number | null;
+            new_type?: components["schemas"]["WorkoutTypeIn"] | null;
+            /** Minutes */
+            minutes: number;
+            /** Note */
+            note?: string | null;
+            /**
+             * Exercises
+             * @default []
+             */
+            exercises: components["schemas"]["ExerciseIn"][];
+        };
+        /** PlanDayOut */
+        PlanDayOut: {
+            /** Week */
+            week: number;
+            /** Weekday */
+            weekday: number;
+            workout_type: components["schemas"]["WorkoutTypeRef"] | null;
+            /** Minutes */
+            minutes: number;
+            /** Note */
+            note: string | null;
+            /** Exercises */
+            exercises: components["schemas"]["ExerciseOut"][];
+        };
+        /** PlanIn */
+        PlanIn: {
+            /** Title */
+            title: string;
+            /** Weeks */
+            weeks: number;
+            /** Current Week */
+            current_week: number;
+            /** Days */
+            days: components["schemas"]["PlanDayIn"][];
+        };
+        /** PlanOut */
+        PlanOut: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Weeks */
+            weeks: number;
+            /**
+             * Cycle Start
+             * Format: date
+             */
+            cycle_start: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Current Week */
+            current_week: number;
+            /** Days */
+            days: components["schemas"]["PlanDayOut"][];
+        };
+        /** PlanProposalOut */
+        PlanProposalOut: {
+            /** Title */
+            title: string;
+            /** Weeks */
+            weeks: number;
+            /** Days */
+            days: components["schemas"]["ProposedDayOut"][];
+        };
+        /** PlannedWorkoutOut */
+        PlannedWorkoutOut: {
+            /** Week */
+            week: number;
+            /** Weekday */
+            weekday: number;
+            workout_type: components["schemas"]["WorkoutTypeRef"] | null;
+            /** Minutes */
+            minutes: number;
+            /** Note */
+            note: string | null;
+            /** Exercises */
+            exercises: components["schemas"]["ExerciseOut"][];
+            /** Done */
+            done: boolean;
+        };
+        /** ProposedDayOut */
+        ProposedDayOut: {
+            /** Week */
+            week: number;
+            /** Weekday */
+            weekday: number;
+            /** Type Name */
+            type_name: string;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "strength" | "cardio";
+            /** Workout Type Id */
+            workout_type_id: number | null;
+            /** Minutes */
+            minutes: number;
+            /** Note */
+            note: string | null;
+            /** Exercises */
+            exercises: components["schemas"]["ExerciseOut"][];
         };
         /** SegmentOut */
         SegmentOut: {
@@ -357,6 +652,35 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WeekProgressOut */
+        WeekProgressOut: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /** Plan Title */
+            plan_title: string | null;
+            /** Plan Week */
+            plan_week: number | null;
+            /** Plan Weeks */
+            plan_weeks: number | null;
+            /** Planned Sessions */
+            planned_sessions: number;
+            /** Done Sessions */
+            done_sessions: number;
+            /** Planned Minutes */
+            planned_minutes: number;
+            /** Done Minutes */
+            done_minutes: number;
+            /** Days */
+            days: components["schemas"]["DayProgressOut"][];
+        };
+        /** WeekSummaryOut */
+        WeekSummaryOut: {
+            /** Text */
+            text: string;
         };
         /** WorkoutTypeIn */
         WorkoutTypeIn: {
@@ -727,6 +1051,203 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    chat_api_plans_chat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanChatIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChatOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    week_summary_api_plans_week_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeekSummaryOut"];
+                };
+            };
+        };
+    };
+    propose_api_plans_proposal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanProposalOut"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    save_plan_api_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    current_plan_api_plans_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"] | null;
+                };
+            };
+        };
+    };
+    week_progress_api_plans_week_progress_get: {
+        parameters: {
+            query?: {
+                start?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeekProgressOut"];
                 };
             };
             /** @description Validation Error */

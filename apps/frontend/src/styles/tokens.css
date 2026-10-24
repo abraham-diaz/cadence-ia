@@ -14,6 +14,12 @@
   --hr: #e34948;
   --hr-band: rgba(227, 73, 72, 0.12);
   --rest: #2a78d6;
+  --strength: #7057d9;
+  --cardio: #d5782a;
+  --done: #23854a;
+  --tab-bar: rgba(252, 252, 251, 0.94);
+  --tab-active: rgba(42, 120, 214, 0.12);
+  --tab-bar-shadow: 0 8px 28px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.08);
 
   --radius: 16px;
   --gutter: 16px;
@@ -43,5 +49,11 @@
     --hr: #e66767;
     --hr-band: rgba(230, 103, 103, 0.16);
     --rest: #3987e5;
+    --strength: #9582f0;
+    --cardio: #e8954f;
+    --done: #37a865;
+    --tab-bar: rgba(38, 38, 35, 0.94);
+    --tab-active: rgba(57, 135, 229, 0.2);
+    --tab-bar-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 }

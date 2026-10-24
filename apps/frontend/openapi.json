@@ -428,6 +428,265 @@
           }
         }
       }
+    },
+    "/api/plans/chat": {
+      "post": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Chat",
+        "description": "Send the whole conversation and get the coach's next reply.",
+        "operationId": "chat_api_plans_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanChatOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/week-summary": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Week Summary",
+        "description": "The last 7 days written as a chat message. The user decides whether to send it.",
+        "operationId": "week_summary_api_plans_week_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekSummaryOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/proposal": {
+      "post": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Propose",
+        "description": "Read the plan agreed in the chat, for the user to review. Nothing is saved.",
+        "operationId": "propose_api_plans_proposal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanProposalOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans": {
+      "post": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Save Plan",
+        "description": "Save the reviewed plan as the current one, creating its new workout types.",
+        "operationId": "save_plan_api_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/current": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Current Plan",
+        "description": "The active plan, with the week of the cycle we are in today; null if there is none.",
+        "operationId": "current_plan_api_plans_current_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PlanOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Current Plan Api Plans Current Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/week-progress": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Week Progress",
+        "description": "A week, Monday to Sunday: what the plan in force asked for and what was trained.\n`start` is any day of the week wanted; without it, this week.",
+        "operationId": "week_progress_api_plans_week_progress_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekProgressOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -486,6 +745,30 @@
           "created_at"
         ],
         "title": "AssessmentOut"
+      },
+      "ChatMessageIn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model"
+            ],
+            "title": "Role"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "ChatMessageIn"
       },
       "Comparison": {
         "properties": {
@@ -584,6 +867,67 @@
         ],
         "title": "Comparison"
       },
+      "ConversationIn": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageIn"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "ConversationIn"
+      },
+      "DayProgressOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "partial",
+              "missed",
+              "pending",
+              "rest",
+              "extra"
+            ],
+            "title": "Status"
+          },
+          "planned": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedWorkoutOut"
+            },
+            "type": "array",
+            "title": "Planned"
+          },
+          "session_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Session Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "status",
+          "planned",
+          "session_ids"
+        ],
+        "title": "DayProgressOut"
+      },
       "ErrorOut": {
         "properties": {
           "detail": {
@@ -597,7 +941,10 @@
               "workout_type_not_found",
               "duplicate_workout_type",
               "session_without_type",
-              "assessment_unavailable"
+              "assessment_unavailable",
+              "coach_unavailable",
+              "no_plan_in_chat",
+              "invalid_plan"
             ],
             "title": "Code"
           }
@@ -608,6 +955,83 @@
           "code"
         ],
         "title": "ErrorOut"
+      },
+      "ExerciseIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "reps": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ExerciseIn"
+      },
+      "ExerciseOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "reps": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "sets",
+          "reps"
+        ],
+        "title": "ExerciseOut"
       },
       "HTTPValidationError": {
         "properties": {
@@ -742,6 +1166,401 @@
           "start_time"
         ],
         "title": "HistoryPoint"
+      },
+      "PlanChatIn": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageIn"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "PlanChatIn"
+      },
+      "PlanChatOut": {
+        "properties": {
+          "reply": {
+            "type": "string",
+            "title": "Reply"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reply"
+        ],
+        "title": "PlanChatOut"
+      },
+      "PlanDayIn": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday"
+          },
+          "workout_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workout Type Id"
+          },
+          "new_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "maximum": 600.0,
+            "minimum": 1.0,
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseIn"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Exercises",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "minutes"
+        ],
+        "title": "PlanDayIn"
+      },
+      "PlanDayOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "workout_type",
+          "minutes",
+          "note",
+          "exercises"
+        ],
+        "title": "PlanDayOut"
+      },
+      "PlanIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "weeks": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Weeks"
+          },
+          "current_week": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Current Week"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/PlanDayIn"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "weeks",
+          "current_week",
+          "days"
+        ],
+        "title": "PlanIn"
+      },
+      "PlanOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "cycle_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Cycle Start"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "current_week": {
+            "type": "integer",
+            "title": "Current Week"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/PlanDayOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "weeks",
+          "cycle_start",
+          "created_at",
+          "current_week",
+          "days"
+        ],
+        "title": "PlanOut"
+      },
+      "PlanProposalOut": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/ProposedDayOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "weeks",
+          "days"
+        ],
+        "title": "PlanProposalOut"
+      },
+      "PlannedWorkoutOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "workout_type",
+          "minutes",
+          "note",
+          "exercises",
+          "done"
+        ],
+        "title": "PlannedWorkoutOut"
+      },
+      "ProposedDayOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "type_name": {
+            "type": "string",
+            "title": "Type Name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio"
+            ],
+            "title": "Category"
+          },
+          "workout_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workout Type Id"
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "type_name",
+          "category",
+          "workout_type_id",
+          "minutes",
+          "note",
+          "exercises"
+        ],
+        "title": "ProposedDayOut"
       },
       "SegmentOut": {
         "properties": {
@@ -1201,11 +2020,102 @@
         ],
         "title": "ValidationError"
       },
+      "WeekProgressOut": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "plan_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Week"
+          },
+          "plan_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Weeks"
+          },
+          "planned_sessions": {
+            "type": "integer",
+            "title": "Planned Sessions"
+          },
+          "done_sessions": {
+            "type": "integer",
+            "title": "Done Sessions"
+          },
+          "planned_minutes": {
+            "type": "integer",
+            "title": "Planned Minutes"
+          },
+          "done_minutes": {
+            "type": "integer",
+            "title": "Done Minutes"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayProgressOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "plan_title",
+          "plan_week",
+          "plan_weeks",
+          "planned_sessions",
+          "done_sessions",
+          "planned_minutes",
+          "done_minutes",
+          "days"
+        ],
+        "title": "WeekProgressOut"
+      },
+      "WeekSummaryOut": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "WeekSummaryOut"
+      },
       "WorkoutTypeIn": {
         "properties": {
           "name": {
             "type": "string",
-            "maxLength": 40,
+            "maxLength": 60,
             "minLength": 1,
             "title": "Name"
           },

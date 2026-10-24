@@ -93,6 +93,13 @@ small {
   margin: -4px 0 -8px;
 }
 
+.top-bar-end {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 44px;
+  align-items: center;
+}
+
 .back-link {
   display: inline-flex;
   align-items: center;

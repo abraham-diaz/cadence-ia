@@ -40,10 +40,6 @@ class AssessmentContent(BaseModel):
     advice: str = Field(description="Un consejo concreto para la próxima sesión.")
 
 
-class AssessmentUnavailable(Exception):
-    """The LLM can't be used (no API key, quota exceeded, network...)."""
-
-
 class Assessor(Protocol):
     model: str  # stored with each assessment
 

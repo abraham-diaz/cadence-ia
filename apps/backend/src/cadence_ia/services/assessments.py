@@ -1,7 +1,8 @@
 import sqlite3
 
 from cadence_ia.domain.assessment import Assessment
-from cadence_ia.llm.assessor import Assessor, AssessmentUnavailable, build_payload
+from cadence_ia.llm.assessor import Assessor, build_payload
+from cadence_ia.llm.errors import LLMUnavailable
 from cadence_ia.services.errors import Conflict, Unavailable
 from cadence_ia.services.sessions import get_detail
 from cadence_ia.storage import assessments
@@ -16,7 +17,7 @@ def assess(conn: sqlite3.Connection, session_id: str, assessor: Assessor) -> Ass
     payload = build_payload(detail.session, detail.stats, detail.segments, detail.comparison)
     try:
         content = assessor(payload)
-    except AssessmentUnavailable as err:
+    except LLMUnavailable as err:
         raise Unavailable("assessment_unavailable", str(err)) from err
 
     assessments.save_assessment(conn, session_id, content.model_dump(), assessor.model)

@@ -12,10 +12,7 @@ export default function PlanPage() {
 
   return (
     <main className="page">
-      <nav className="top-bar chat-top-bar">
-        <Link to="/" className="back-link">
-          ‹ Entrenamientos
-        </Link>
+      <nav className="top-bar top-bar-end">
         <Link to="/plan/nuevo" className="link-button">
           Nuevo plan
         </Link>

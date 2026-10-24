@@ -109,8 +109,8 @@ export default function PlanChatPage() {
   return (
     <main className="page chat-page">
       <nav className="top-bar chat-top-bar">
-        <Link to="/" className="back-link">
-          ‹ Entrenamientos
+        <Link to="/plan" className="back-link">
+          ‹ Plan
         </Link>
         {messages.length > 0 && (
           <button type="button" className="link-button" onClick={restart} disabled={pending}>

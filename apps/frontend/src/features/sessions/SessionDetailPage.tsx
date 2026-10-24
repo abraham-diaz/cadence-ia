@@ -23,7 +23,7 @@ export default function SessionDetailPage() {
     <main className="page">
       <nav className="top-bar">
         <Link to="/" className="back-link">
-          ‹ Entrenamientos
+          ‹ Inicio
         </Link>
       </nav>
 

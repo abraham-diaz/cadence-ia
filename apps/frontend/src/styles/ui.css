@@ -36,6 +36,19 @@
   gap: 8px;
 }
 
+/* Left stripe with the workout type's category */
+.stripe-strength {
+  border-left: 4px solid var(--strength);
+}
+
+.stripe-cardio {
+  border-left: 4px solid var(--cardio);
+}
+
+.stripe-none {
+  border-left: 4px dashed var(--border);
+}
+
 .button {
   display: inline-flex;
   align-items: center;

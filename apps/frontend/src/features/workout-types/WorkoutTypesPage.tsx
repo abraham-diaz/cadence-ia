@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import type { WorkoutType } from '../../api/types.ts'
 import {
   createWorkoutType,
@@ -34,12 +33,6 @@ export default function WorkoutTypesPage() {
 
   return (
     <main className="page">
-      <nav className="top-bar">
-        <Link to="/" className="back-link">
-          ‹ Entrenamientos
-        </Link>
-      </nav>
-
       <header className="page-header">
         <p className="eyebrow">Ajustes</p>
         <h1>Tipos de entrenamiento</h1>

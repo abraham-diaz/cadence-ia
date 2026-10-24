@@ -1,22 +1,42 @@
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
+import HomePage from '../features/home/HomePage.tsx'
 import PlanChatPage from '../features/plans/PlanChatPage.tsx'
 import PlanPage from '../features/plans/PlanPage.tsx'
 import PlanReviewPage from '../features/plans/PlanReviewPage.tsx'
 import SessionDetailPage from '../features/sessions/SessionDetailPage.tsx'
-import SessionListPage from '../features/sessions/SessionListPage.tsx'
 import WorkoutTypesPage from '../features/workout-types/WorkoutTypesPage.tsx'
+import { TabLayout } from './TabBar.tsx'
+
+// A data router: it's what enables view transitions and scroll restoration.
+const router = createBrowserRouter([
+  {
+    element: <Root />,
+    children: [
+      {
+        element: <TabLayout />,
+        children: [
+          { path: '/', element: <HomePage /> },
+          { path: '/plan', element: <PlanPage /> },
+          { path: '/tipos', element: <WorkoutTypesPage /> },
+        ],
+      },
+      { path: '/sesion/:id', element: <SessionDetailPage /> },
+      { path: '/plan/nuevo', element: <PlanChatPage /> },
+      { path: '/plan/revisar', element: <PlanReviewPage /> },
+    ],
+  },
+])
+
+function Root() {
+  return (
+    <>
+      <Outlet />
+      <ScrollRestoration />
+    </>
+  )
+}
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<SessionListPage />} />
-        <Route path="/sesion/:id" element={<SessionDetailPage />} />
-        <Route path="/tipos" element={<WorkoutTypesPage />} />
-        <Route path="/plan" element={<PlanPage />} />
-        <Route path="/plan/nuevo" element={<PlanChatPage />} />
-        <Route path="/plan/revisar" element={<PlanReviewPage />} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return <RouterProvider router={router} />
 }

@@ -1,0 +1,83 @@
+/* The slide-in starts off to the side: no sideways scroll while it does. */
+.with-tabs {
+  overflow-x: clip;
+}
+
+.with-tabs .page {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 92px);
+}
+
+/* A floating bubble above the page, not a bar glued to the edge. */
+.tab-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  z-index: 10;
+  transform: translateX(-50%);
+  width: min(calc(100% - 2 * var(--gutter)), 240px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--tab-bar);
+  border: 1px solid var(--border);
+  box-shadow: var(--tab-bar-shadow);
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+}
+
+.tab {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.tab.active {
+  color: var(--accent);
+  background: var(--tab-active);
+}
+
+.tab.active svg {
+  stroke-width: 2.25;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab {
+    transition: none;
+  }
+}
+
+/* Switching tabs: the page coming in slides from the side it's on. A plain animation, not a
+   View Transition, whose overlay swallowed any tap until it ended. */
+@media (prefers-reduced-motion: no-preference) {
+  .tab-page[data-enter] {
+    animation: 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .tab-page[data-enter='forward'] {
+    animation-name: slide-in-right;
+  }
+
+  .tab-page[data-enter='back'] {
+    animation-name: slide-in-left;
+  }
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(30%);
+      opacity: 0;
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-30%);
+      opacity: 0;
+    }
+  }
+}

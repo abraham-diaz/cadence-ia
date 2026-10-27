@@ -1,7 +1,4 @@
-"""Serve the compiled React app (apps/frontend/dist) from FastAPI.
-
-In production a single service answers both the API and the web app.
-"""
+"""Serve the built React app from FastAPI: one service for the API and the web app."""
 
 from pathlib import Path
 
@@ -10,12 +7,8 @@ from fastapi.responses import FileResponse
 
 
 def mount_frontend(app: FastAPI, static_dir: Path) -> None:
-    """Serve files from `static_dir`, falling back to index.html.
-
-    The fallback lets React Router handle URLs like /sesion/123 when they are
-    opened directly. Must be called after every API route is registered,
-    because this catch-all route would otherwise shadow them.
-    """
+    """Serve `static_dir`, falling back to index.html so React Router handles /sesion/123.
+    Call it after registering the API routes: this catch-all route would shadow them."""
     root = static_dir.resolve()
     index = root / "index.html"
     if not index.is_file():

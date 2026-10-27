@@ -1,0 +1,72 @@
+.workout {
+  padding-left: 12px;
+}
+
+.workout-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workout-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.workout-title {
+  font-weight: 650;
+}
+
+.workout-toggle {
+  width: calc(100% + 8px);
+  margin: -4px -8px -4px 0;
+  padding: 4px 8px 4px 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workout-toggle:active {
+  background: var(--surface-pressed);
+}
+
+.workout-chevron {
+  flex: none;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.workout-chevron.open {
+  transform: rotate(180deg);
+}
+
+.workout-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0 4px;
+}
+
+.workout-panel.fold-out {
+  animation: fold-out 0.2s ease-out;
+}
+
+@keyframes fold-out {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workout-chevron,
+  .workout-panel {
+    transition: none;
+    animation: none;
+  }
+}

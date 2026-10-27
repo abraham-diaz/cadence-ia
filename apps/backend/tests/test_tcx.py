@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from cadence_ia.tcx import parse_tcx
+from cadence_ia.importers.tcx import parse_tcx
 
 SAMPLE = Path(__file__).parent / "data" / "8730973826466172504.tcx"
 TZ = timezone(timedelta(hours=2))

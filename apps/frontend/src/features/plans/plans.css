@@ -1,0 +1,308 @@
+/* Chat */
+.chat-page {
+  min-height: 100dvh;
+  padding-bottom: 0;
+}
+
+.chat-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.chat-suggestions .chip-button {
+  text-align: left;
+  font-weight: 500;
+}
+
+.chat-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-bubble-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+
+.chat-bubble-model {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 6px;
+}
+
+.chat-typing {
+  color: var(--text-muted);
+}
+
+.chat-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chat-composer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 10px var(--gutter) calc(env(safe-area-inset-bottom) + 10px);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.chat-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-tools:empty {
+  display: none;
+}
+
+.chat-use-plan {
+  margin-left: auto;
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  min-height: 44px;
+  max-height: 160px;
+  padding: 10px 12px;
+  resize: none;
+  line-height: 1.4;
+  background: var(--surface);
+}
+
+.chat-send {
+  width: 44px;
+  padding: 0;
+  font-size: 1.2rem;
+  border-radius: 50%;
+}
+
+/* Plan review */
+.review-page {
+  padding-bottom: 0;
+}
+
+.review-field,
+.note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.new-types {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.new-types .section-title {
+  margin-bottom: 0;
+}
+
+.new-type-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.review-week {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-week-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.review-week-head .section-title {
+  margin-bottom: 0;
+}
+
+.day-editor {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.day-editor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-editor-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.minutes-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.minutes-field .text-input {
+  width: 64px;
+  text-align: center;
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--surface-pressed);
+}
+
+.exercise-editor .text-input {
+  background: var(--surface);
+}
+
+.exercise-numbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.exercise-numbers label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-link {
+  align-self: flex-start;
+}
+
+.remove-day {
+  align-self: flex-end;
+}
+
+.review-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 10px var(--gutter) calc(env(safe-area-inset-bottom) + 10px);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+/* Current plan */
+.plan-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.plan-week {
+  padding: 4px 14px;
+}
+
+.plan-weekday {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.plan-weekday + .plan-weekday {
+  border-top: 1px solid var(--border);
+}
+
+.plan-weekday.rest {
+  align-items: center;
+  padding: 8px 0;
+}
+
+.plan-weekday-name {
+  flex: none;
+  width: 36px;
+  padding-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.plan-weekday.rest .plan-weekday-name {
+  padding-top: 0;
+}
+
+.plan-weekday.today .plan-weekday-name {
+  color: var(--accent);
+}
+
+.plan-workouts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

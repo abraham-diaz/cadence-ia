@@ -2,22 +2,22 @@ import pytest
 from conftest import sets_curve, write_sample_folder
 from fastapi.testclient import TestClient
 
-from cadence_ia import db
-from cadence_ia.api import app
-from cadence_ia.ingest import ingest
+from cadence_ia.config import Settings
+from cadence_ia.main import create_app
+from cadence_ia.services.ingest import ingest
+from cadence_ia.storage.database import connect
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path):
     folder = tmp_path / "tcx"
     folder.mkdir()
     write_sample_folder(folder)
     db_file = tmp_path / "test.db"
-    conn = db.connect(db_file)
+    conn = connect(db_file)
     ingest(conn, folder)
     conn.close()
-    monkeypatch.setenv("CADENCE_DB", str(db_file))
-    return TestClient(app)
+    return TestClient(create_app(Settings(db_path=db_file)))
 
 
 def make_type(client, name="Pierna", category="strength") -> dict:
@@ -107,6 +107,20 @@ def test_duplicate_type_name_is_409(client):
     make_type(client, "Pierna")
     response = client.post("/api/workout-types", json={"name": "pierna", "category": "cardio"})
     assert response.status_code == 409
+    assert response.json()["code"] == "duplicate_workout_type"
+
+
+def test_errors_carry_a_stable_code(client):
+    """The frontend shows a message for each code, so they must not change."""
+    cases = [
+        (client.get("/api/sessions/999"), 404, "session_not_found"),
+        (client.put("/api/sessions/111/workout-type", json={"workout_type_id": 42}), 422, "workout_type_not_found"),
+        (client.put("/api/workout-types/42", json={"name": "X", "category": "cardio"}), 404, "workout_type_not_found"),
+        (client.delete("/api/workout-types/42"), 404, "workout_type_not_found"),
+    ]
+    for response, status, code in cases:
+        assert response.status_code == status
+        assert response.json()["code"] == code
 
 
 def test_invalid_type_input_is_422(client):
@@ -128,8 +142,8 @@ def test_unknown_session_is_404(client):
     assert client.get("/api/sessions/999").status_code == 404
 
 
-def test_empty_database(tmp_path, monkeypatch):
-    monkeypatch.setenv("CADENCE_DB", str(tmp_path / "empty.db"))
+def test_empty_database(tmp_path):
+    app = create_app(Settings(db_path=tmp_path / "empty.db"))
     assert TestClient(app).get("/api/sessions").json() == []
 
 

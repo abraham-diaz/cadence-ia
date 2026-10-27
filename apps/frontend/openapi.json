@@ -1,0 +1,2648 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "cadence-ia",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "List Sessions",
+        "operationId": "list_sessions_api_sessions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SessionSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Sessions Api Sessions Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Get Session",
+        "operationId": "get_session_api_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}/workout-type": {
+      "put": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Set Workout Type",
+        "operationId": "set_workout_type_api_sessions__session_id__workout_type_put",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionTypeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}/assessment": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Assess",
+        "description": "Ask the LLM for a (new) assessment of the session and store it.",
+        "operationId": "assess_api_sessions__session_id__assessment_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workout-types": {
+      "get": {
+        "tags": [
+          "workout types"
+        ],
+        "summary": "List Workout Types",
+        "operationId": "list_workout_types_api_workout_types_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkoutTypeOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Workout Types Api Workout Types Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "workout types"
+        ],
+        "summary": "Create Workout Type",
+        "operationId": "create_workout_type_api_workout_types_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkoutTypeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutTypeOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workout-types/{type_id}": {
+      "put": {
+        "tags": [
+          "workout types"
+        ],
+        "summary": "Update Workout Type",
+        "operationId": "update_workout_type_api_workout_types__type_id__put",
+        "parameters": [
+          {
+            "name": "type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Type Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkoutTypeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutTypeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "workout types"
+        ],
+        "summary": "Delete Workout Type",
+        "operationId": "delete_workout_type_api_workout_types__type_id__delete",
+        "parameters": [
+          {
+            "name": "type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Type Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workout-types/{type_id}/exercises": {
+      "get": {
+        "tags": [
+          "workout types"
+        ],
+        "summary": "Suggest Exercises",
+        "description": "A few catalog exercises per muscle of the type; `day` (default today) picks which.",
+        "operationId": "suggest_exercises_api_workout_types__type_id__exercises_get",
+        "parameters": [
+          {
+            "name": "type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Type Id"
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MuscleSuggestionOut"
+                  },
+                  "title": "Response Suggest Exercises Api Workout Types  Type Id  Exercises Get"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/muscles": {
+      "get": {
+        "tags": [
+          "exercises"
+        ],
+        "summary": "List Muscles",
+        "description": "The muscle groups a workout type can train, in display order.",
+        "operationId": "list_muscles_api_muscles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MuscleOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Muscles Api Muscles Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exercises": {
+      "get": {
+        "tags": [
+          "exercises"
+        ],
+        "summary": "Search Exercises",
+        "description": "Catalog exercises whose name has every word of `q`, ignoring accents.",
+        "operationId": "search_exercises_api_exercises_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogExerciseOut"
+                  },
+                  "title": "Response Search Exercises Api Exercises Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exercises/{exercise_id}": {
+      "get": {
+        "tags": [
+          "exercises"
+        ],
+        "summary": "Get Exercise",
+        "description": "How to do it: picture, instructions and the muscles it trains.",
+        "operationId": "get_exercise_api_exercises__exercise_id__get",
+        "parameters": [
+          {
+            "name": "exercise_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Exercise Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseDetailOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/chat": {
+      "post": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Chat",
+        "description": "Send the whole conversation and get the coach's next reply.",
+        "operationId": "chat_api_plans_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanChatOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/week-summary": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Week Summary",
+        "description": "The last 7 days written as a chat message. The user decides whether to send it.",
+        "operationId": "week_summary_api_plans_week_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekSummaryOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/proposal": {
+      "post": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Propose",
+        "description": "Read the plan agreed in the chat, for the user to review. Nothing is saved.",
+        "operationId": "propose_api_plans_proposal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanProposalOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans": {
+      "post": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Save Plan",
+        "description": "Save the reviewed plan as the current one, creating its new workout types.",
+        "operationId": "save_plan_api_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/current": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Current Plan",
+        "description": "The active plan, with the week of the cycle we are in today; null if there is none.",
+        "operationId": "current_plan_api_plans_current_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PlanOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Current Plan Api Plans Current Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plans/week-progress": {
+      "get": {
+        "tags": [
+          "plans"
+        ],
+        "summary": "Week Progress",
+        "description": "A week, Monday to Sunday: what the plan in force asked for and what was trained.\n`start` is any day of the week wanted; without it, this week.",
+        "operationId": "week_progress_api_plans_week_progress_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekProgressOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssessmentOut": {
+        "properties": {
+          "headline": {
+            "type": "string",
+            "title": "Headline",
+            "description": "Una frase corta que resuma la sesión."
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "Valoración general en 2-3 frases."
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths",
+            "description": "2-3 cosas que fueron bien."
+          },
+          "improvements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Improvements",
+            "description": "1-3 cosas a mejorar."
+          },
+          "advice": {
+            "type": "string",
+            "title": "Advice",
+            "description": "Un consejo concreto para la próxima sesión."
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "headline",
+          "summary",
+          "strengths",
+          "improvements",
+          "advice",
+          "model",
+          "created_at"
+        ],
+        "title": "AssessmentOut"
+      },
+      "CatalogExerciseOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "license": {
+            "type": "string",
+            "title": "License"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "license",
+          "author"
+        ],
+        "title": "CatalogExerciseOut"
+      },
+      "ChatMessageIn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model"
+            ],
+            "title": "Role"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "ChatMessageIn"
+      },
+      "Comparison": {
+        "properties": {
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "hr_avg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Avg"
+          },
+          "hr_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Max"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "avg_rest_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Rest S"
+          },
+          "recovery_30s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery 30S"
+          },
+          "recovery_60s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery 60S"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "duration_s",
+          "hr_avg",
+          "hr_max",
+          "sets",
+          "avg_rest_s",
+          "recovery_30s",
+          "recovery_60s",
+          "sessions"
+        ],
+        "title": "Comparison"
+      },
+      "ConversationIn": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageIn"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "ConversationIn"
+      },
+      "DayProgressOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "partial",
+              "missed",
+              "pending",
+              "rest",
+              "extra"
+            ],
+            "title": "Status"
+          },
+          "planned": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedWorkoutOut"
+            },
+            "type": "array",
+            "title": "Planned"
+          },
+          "session_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Session Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "status",
+          "planned",
+          "session_ids"
+        ],
+        "title": "DayProgressOut"
+      },
+      "ErrorOut": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "session_not_found",
+              "workout_type_not_found",
+              "exercise_not_found",
+              "duplicate_workout_type",
+              "session_without_type",
+              "assessment_unavailable",
+              "coach_unavailable",
+              "no_plan_in_chat",
+              "invalid_plan"
+            ],
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail",
+          "code"
+        ],
+        "title": "ErrorOut"
+      },
+      "ExerciseDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "license": {
+            "type": "string",
+            "title": "License"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "primary_muscles": {
+            "items": {
+              "$ref": "#/components/schemas/MuscleOut"
+            },
+            "type": "array",
+            "title": "Primary Muscles"
+          },
+          "secondary_muscles": {
+            "items": {
+              "$ref": "#/components/schemas/MuscleOut"
+            },
+            "type": "array",
+            "title": "Secondary Muscles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "license",
+          "author",
+          "description",
+          "primary_muscles",
+          "secondary_muscles"
+        ],
+        "title": "ExerciseDetailOut"
+      },
+      "ExerciseIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "reps": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reps"
+          },
+          "catalog_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ExerciseIn"
+      },
+      "ExerciseOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "reps": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reps"
+          },
+          "catalog_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Id"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "sets",
+          "reps",
+          "catalog_id",
+          "image_url"
+        ],
+        "title": "ExerciseOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HeartRatePoint": {
+        "properties": {
+          "t": {
+            "type": "number",
+            "title": "T"
+          },
+          "hr": {
+            "type": "integer",
+            "title": "Hr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "t",
+          "hr"
+        ],
+        "title": "HeartRatePoint"
+      },
+      "HistoryPoint": {
+        "properties": {
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "hr_avg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Avg"
+          },
+          "hr_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Max"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "avg_rest_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Rest S"
+          },
+          "recovery_30s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery 30S"
+          },
+          "recovery_60s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery 60S"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "duration_s",
+          "hr_avg",
+          "hr_max",
+          "sets",
+          "avg_rest_s",
+          "recovery_30s",
+          "recovery_60s",
+          "id",
+          "start_time"
+        ],
+        "title": "HistoryPoint"
+      },
+      "MuscleOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "chest",
+              "back",
+              "shoulders",
+              "biceps",
+              "triceps",
+              "abs",
+              "glutes",
+              "quads",
+              "hamstrings",
+              "calves"
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "MuscleOut"
+      },
+      "MuscleSuggestionOut": {
+        "properties": {
+          "muscle": {
+            "$ref": "#/components/schemas/MuscleOut"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "type": "object",
+        "required": [
+          "muscle",
+          "exercises"
+        ],
+        "title": "MuscleSuggestionOut"
+      },
+      "PlanChatIn": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageIn"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "PlanChatIn"
+      },
+      "PlanChatOut": {
+        "properties": {
+          "reply": {
+            "type": "string",
+            "title": "Reply"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reply"
+        ],
+        "title": "PlanChatOut"
+      },
+      "PlanDayIn": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday"
+          },
+          "workout_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workout Type Id"
+          },
+          "new_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "maximum": 600.0,
+            "minimum": 1.0,
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseIn"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Exercises",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "minutes"
+        ],
+        "title": "PlanDayIn"
+      },
+      "PlanDayOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "workout_type",
+          "minutes",
+          "note",
+          "exercises"
+        ],
+        "title": "PlanDayOut"
+      },
+      "PlanIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "weeks": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Weeks"
+          },
+          "current_week": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Current Week"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/PlanDayIn"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "weeks",
+          "current_week",
+          "days"
+        ],
+        "title": "PlanIn"
+      },
+      "PlanOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "cycle_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Cycle Start"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "current_week": {
+            "type": "integer",
+            "title": "Current Week"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/PlanDayOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "weeks",
+          "cycle_start",
+          "created_at",
+          "current_week",
+          "days"
+        ],
+        "title": "PlanOut"
+      },
+      "PlanProposalOut": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/ProposedDayOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "weeks",
+          "days"
+        ],
+        "title": "PlanProposalOut"
+      },
+      "PlannedWorkoutOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "workout_type",
+          "minutes",
+          "note",
+          "exercises",
+          "done"
+        ],
+        "title": "PlannedWorkoutOut"
+      },
+      "ProposedDayOut": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "type_name": {
+            "type": "string",
+            "title": "Type Name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio"
+            ],
+            "title": "Category"
+          },
+          "workout_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workout Type Id"
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "weekday",
+          "type_name",
+          "category",
+          "workout_type_id",
+          "minutes",
+          "note",
+          "exercises"
+        ],
+        "title": "ProposedDayOut"
+      },
+      "SegmentOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "work",
+              "rest"
+            ],
+            "title": "Kind"
+          },
+          "start_s": {
+            "type": "integer",
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "integer",
+            "title": "End S"
+          },
+          "duration_s": {
+            "type": "integer",
+            "title": "Duration S"
+          },
+          "hr_start": {
+            "type": "integer",
+            "title": "Hr Start"
+          },
+          "hr_end": {
+            "type": "integer",
+            "title": "Hr End"
+          },
+          "hr_avg": {
+            "type": "integer",
+            "title": "Hr Avg"
+          },
+          "drop_30s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drop 30S"
+          },
+          "drop_60s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drop 60S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "start_s",
+          "end_s",
+          "duration_s",
+          "hr_start",
+          "hr_end",
+          "hr_avg",
+          "drop_30s",
+          "drop_60s"
+        ],
+        "title": "SegmentOut"
+      },
+      "SessionDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time"
+          },
+          "sport": {
+            "type": "string",
+            "title": "Sport"
+          },
+          "duration_s": {
+            "type": "integer",
+            "title": "Duration S"
+          },
+          "calories": {
+            "type": "integer",
+            "title": "Calories"
+          },
+          "hr_min": {
+            "type": "integer",
+            "title": "Hr Min"
+          },
+          "hr_avg": {
+            "type": "integer",
+            "title": "Hr Avg"
+          },
+          "hr_max": {
+            "type": "integer",
+            "title": "Hr Max"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "rests": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rests"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "threshold_bpm": {
+            "type": "number",
+            "title": "Threshold Bpm"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/SegmentOut"
+            },
+            "type": "array",
+            "title": "Segments"
+          },
+          "heart_rate": {
+            "items": {
+              "$ref": "#/components/schemas/HeartRatePoint"
+            },
+            "type": "array",
+            "title": "Heart Rate"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/SessionStats"
+          },
+          "comparison": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Comparison"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryPoint"
+            },
+            "type": "array",
+            "title": "History"
+          },
+          "assessment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssessmentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "start_time",
+          "sport",
+          "duration_s",
+          "calories",
+          "hr_min",
+          "hr_avg",
+          "hr_max",
+          "workout_type",
+          "sets",
+          "rests",
+          "device",
+          "threshold_bpm",
+          "segments",
+          "heart_rate",
+          "stats",
+          "comparison",
+          "history",
+          "assessment"
+        ],
+        "title": "SessionDetail"
+      },
+      "SessionStats": {
+        "properties": {
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "hr_avg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Avg"
+          },
+          "hr_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Max"
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "avg_rest_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Rest S"
+          },
+          "recovery_30s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery 30S"
+          },
+          "recovery_60s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery 60S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "duration_s",
+          "hr_avg",
+          "hr_max",
+          "sets",
+          "avg_rest_s",
+          "recovery_30s",
+          "recovery_60s"
+        ],
+        "title": "SessionStats"
+      },
+      "SessionSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time"
+          },
+          "sport": {
+            "type": "string",
+            "title": "Sport"
+          },
+          "duration_s": {
+            "type": "integer",
+            "title": "Duration S"
+          },
+          "calories": {
+            "type": "integer",
+            "title": "Calories"
+          },
+          "hr_min": {
+            "type": "integer",
+            "title": "Hr Min"
+          },
+          "hr_avg": {
+            "type": "integer",
+            "title": "Hr Avg"
+          },
+          "hr_max": {
+            "type": "integer",
+            "title": "Hr Max"
+          },
+          "workout_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkoutTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sets": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sets"
+          },
+          "rests": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "start_time",
+          "sport",
+          "duration_s",
+          "calories",
+          "hr_min",
+          "hr_avg",
+          "hr_max",
+          "workout_type",
+          "sets",
+          "rests"
+        ],
+        "title": "SessionSummary"
+      },
+      "SessionTypeIn": {
+        "properties": {
+          "workout_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workout Type Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "workout_type_id"
+        ],
+        "title": "SessionTypeIn"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WeekProgressOut": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "plan_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Week"
+          },
+          "plan_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Weeks"
+          },
+          "planned_sessions": {
+            "type": "integer",
+            "title": "Planned Sessions"
+          },
+          "done_sessions": {
+            "type": "integer",
+            "title": "Done Sessions"
+          },
+          "planned_minutes": {
+            "type": "integer",
+            "title": "Planned Minutes"
+          },
+          "done_minutes": {
+            "type": "integer",
+            "title": "Done Minutes"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayProgressOut"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "plan_title",
+          "plan_week",
+          "plan_weeks",
+          "planned_sessions",
+          "done_sessions",
+          "planned_minutes",
+          "done_minutes",
+          "days"
+        ],
+        "title": "WeekProgressOut"
+      },
+      "WeekSummaryOut": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "WeekSummaryOut"
+      },
+      "WorkoutTypeIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio"
+            ],
+            "title": "Category"
+          },
+          "muscles": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "chest",
+                "back",
+                "shoulders",
+                "biceps",
+                "triceps",
+                "abs",
+                "glutes",
+                "quads",
+                "hamstrings",
+                "calves"
+              ]
+            },
+            "type": "array",
+            "title": "Muscles",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "category"
+        ],
+        "title": "WorkoutTypeIn"
+      },
+      "WorkoutTypeOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio"
+            ],
+            "title": "Category"
+          },
+          "session_count": {
+            "type": "integer",
+            "title": "Session Count"
+          },
+          "muscles": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "chest",
+                "back",
+                "shoulders",
+                "biceps",
+                "triceps",
+                "abs",
+                "glutes",
+                "quads",
+                "hamstrings",
+                "calves"
+              ]
+            },
+            "type": "array",
+            "title": "Muscles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "session_count",
+          "muscles"
+        ],
+        "title": "WorkoutTypeOut"
+      },
+      "WorkoutTypeRef": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio"
+            ],
+            "title": "Category"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category"
+        ],
+        "title": "WorkoutTypeRef"
+      }
+    }
+  }
+}

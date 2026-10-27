@@ -9,6 +9,7 @@ export interface DraftExercise {
   name: string
   sets: string
   reps: string
+  catalogId?: number | null // picked from the catalog; older drafts don't have it
 }
 
 export interface DraftDay {
@@ -34,10 +35,16 @@ let counter = 0
 // crypto.randomUUID() only exists over HTTPS, and the app is also opened over plain HTTP at home.
 export const newKey = () => `k${Date.now().toString(36)}${(counter++).toString(36)}`
 
-export const emptyExercise = (): DraftExercise => ({ key: newKey(), name: '', sets: '', reps: '' })
+export const emptyExercise = (): DraftExercise => ({ key: newKey(), name: '', sets: '', reps: '', catalogId: null })
 
 const draftExercises = (exercises: Exercise[]): DraftExercise[] =>
-  exercises.map((e) => ({ key: newKey(), name: e.name, sets: e.sets === null ? '' : String(e.sets), reps: e.reps ?? '' }))
+  exercises.map((e) => ({
+    key: newKey(),
+    name: e.name,
+    sets: e.sets === null ? '' : String(e.sets),
+    reps: e.reps ?? '',
+    catalogId: e.catalog_id,
+  }))
 
 export function fromProposal(proposal: PlanProposal): PlanDraft {
   return {
@@ -128,7 +135,7 @@ export function toInput(draft: PlanDraft): PlanInput | string {
       if (e.reps.trim().length > MAX.reps) {
         return `${where}: las repeticiones de «${name}» pasan de ${MAX.reps} caracteres`
       }
-      exercises.push({ name, sets, reps: e.reps.trim() || null })
+      exercises.push({ name, sets, reps: e.reps.trim() || null, catalog_id: e.catalogId ?? null })
     }
     if (exercises.length > MAX.exercises) return `${where}: más de ${MAX.exercises} ejercicios`
 
@@ -137,7 +144,7 @@ export function toInput(draft: PlanDraft): PlanInput | string {
       weekday: day.weekday,
       ...(day.type.kind === 'existing'
         ? { workout_type_id: day.type.id }
-        : { new_type: { name: day.type.name.trim(), category: day.type.category } }),
+        : { new_type: { name: day.type.name.trim(), category: day.type.category, muscles: [] } }),
       minutes,
       note: day.note.trim() || null,
       exercises,

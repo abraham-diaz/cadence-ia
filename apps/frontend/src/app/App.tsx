@@ -4,6 +4,7 @@ import HomePage from '../features/home/HomePage.tsx'
 import PlanChatPage from '../features/plans/PlanChatPage.tsx'
 import PlanPage from '../features/plans/PlanPage.tsx'
 import PlanReviewPage from '../features/plans/PlanReviewPage.tsx'
+import ExerciseDetailPage from '../features/exercises/ExerciseDetailPage.tsx'
 import SessionDetailPage from '../features/sessions/SessionDetailPage.tsx'
 import WorkoutTypesPage from '../features/workout-types/WorkoutTypesPage.tsx'
 import { TabLayout } from './TabBar.tsx'
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
         ],
       },
       { path: '/sesion/:id', element: <SessionDetailPage /> },
+      { path: '/ejercicio/:id', element: <ExerciseDetailPage /> },
       { path: '/plan/nuevo', element: <PlanChatPage /> },
       { path: '/plan/revisar', element: <PlanReviewPage /> },
     ],

@@ -121,7 +121,7 @@ function DayView({ day }: { day: PlanDay }) {
         <ul className="plan-exercises">
           {day.exercises.map((e, i) => (
             <li key={i}>
-              {e.name}
+              {e.catalog_id ? <Link to={`/ejercicio/${e.catalog_id}`}>{e.name}</Link> : e.name}
               {(e.sets || e.reps) && (
                 <span className="muted">
                   {' '}

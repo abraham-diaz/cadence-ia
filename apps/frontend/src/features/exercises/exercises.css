@@ -1,0 +1,147 @@
+.exercises-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.exercises-hint {
+  gap: 4px;
+}
+
+a.exercises-hint:active {
+  background: var(--surface-pressed);
+}
+
+.exercise-group h3 {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.exercise-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exercise-link {
+  margin: -4px -8px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: inherit;
+}
+
+.exercise-link:active {
+  background: var(--surface-pressed);
+}
+
+.exercise-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.exercise-chevron {
+  flex: none;
+  color: var(--text-muted);
+}
+
+/* wger's drawings are dark lines on transparent: they need a light backdrop in dark mode too. */
+.exercise-thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  object-fit: contain;
+}
+
+.exercise-credit {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.exercise-credit a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* How-to page */
+.exercise-picture {
+  width: 100%;
+  max-height: 280px;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--border);
+  object-fit: contain;
+}
+
+.exercise-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 16px;
+  line-height: 1.5;
+}
+
+/* Name field with catalog matches, in the plan editor */
+.exercise-name {
+  position: relative;
+  flex: 1;
+}
+
+.exercise-linked {
+  margin-top: 4px;
+  color: var(--done);
+}
+
+.exercise-matches {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--tab-bar-shadow);
+}
+
+.exercise-match {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exercise-match:active {
+  background: var(--surface-pressed);
+}
+
+.exercise-thumb-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}

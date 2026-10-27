@@ -128,6 +128,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workout-types/{type_id}/exercises": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Suggest Exercises
+         * @description A few catalog exercises per muscle of the type; `day` (default today) picks which.
+         */
+        get: operations["suggest_exercises_api_workout_types__type_id__exercises_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/muscles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Muscles
+         * @description The muscle groups a workout type can train, in display order.
+         */
+        get: operations["list_muscles_api_muscles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exercises": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Exercises
+         * @description Catalog exercises whose name has every word of `q`, ignoring accents.
+         */
+        get: operations["search_exercises_api_exercises_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exercises/{exercise_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Exercise
+         * @description How to do it: picture, instructions and the muscles it trains.
+         */
+        get: operations["get_exercise_api_exercises__exercise_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/chat": {
         parameters: {
             query?: never;
@@ -288,6 +368,19 @@ export interface components {
              */
             created_at: string;
         };
+        /** CatalogExerciseOut */
+        CatalogExerciseOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Image Url */
+            image_url: string | null;
+            /** License */
+            license: string;
+            /** Author */
+            author: string | null;
+        };
         /** ChatMessageIn */
         ChatMessageIn: {
             /**
@@ -347,7 +440,26 @@ export interface components {
              * Code
              * @enum {string}
              */
-            code: "session_not_found" | "workout_type_not_found" | "duplicate_workout_type" | "session_without_type" | "assessment_unavailable" | "coach_unavailable" | "no_plan_in_chat" | "invalid_plan";
+            code: "session_not_found" | "workout_type_not_found" | "exercise_not_found" | "duplicate_workout_type" | "session_without_type" | "assessment_unavailable" | "coach_unavailable" | "no_plan_in_chat" | "invalid_plan";
+        };
+        /** ExerciseDetailOut */
+        ExerciseDetailOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Image Url */
+            image_url: string | null;
+            /** License */
+            license: string;
+            /** Author */
+            author: string | null;
+            /** Description */
+            description: string | null;
+            /** Primary Muscles */
+            primary_muscles: components["schemas"]["MuscleOut"][];
+            /** Secondary Muscles */
+            secondary_muscles: components["schemas"]["MuscleOut"][];
         };
         /** ExerciseIn */
         ExerciseIn: {
@@ -357,6 +469,8 @@ export interface components {
             sets?: number | null;
             /** Reps */
             reps?: string | null;
+            /** Catalog Id */
+            catalog_id?: number | null;
         };
         /** ExerciseOut */
         ExerciseOut: {
@@ -366,6 +480,10 @@ export interface components {
             sets: number | null;
             /** Reps */
             reps: string | null;
+            /** Catalog Id */
+            catalog_id: number | null;
+            /** Image Url */
+            image_url: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -402,6 +520,22 @@ export interface components {
              * Format: date-time
              */
             start_time: string;
+        };
+        /** MuscleOut */
+        MuscleOut: {
+            /**
+             * Id
+             * @enum {string}
+             */
+            id: "chest" | "back" | "shoulders" | "biceps" | "triceps" | "abs" | "glutes" | "quads" | "hamstrings" | "calves";
+            /** Name */
+            name: string;
+        };
+        /** MuscleSuggestionOut */
+        MuscleSuggestionOut: {
+            muscle: components["schemas"]["MuscleOut"];
+            /** Exercises */
+            exercises: components["schemas"]["CatalogExerciseOut"][];
         };
         /** PlanChatIn */
         PlanChatIn: {
@@ -691,6 +825,11 @@ export interface components {
              * @enum {string}
              */
             category: "strength" | "cardio";
+            /**
+             * Muscles
+             * @default []
+             */
+            muscles: ("chest" | "back" | "shoulders" | "biceps" | "triceps" | "abs" | "glutes" | "quads" | "hamstrings" | "calves")[];
         };
         /** WorkoutTypeOut */
         WorkoutTypeOut: {
@@ -705,6 +844,8 @@ export interface components {
             category: "strength" | "cardio";
             /** Session Count */
             session_count: number;
+            /** Muscles */
+            muscles: ("chest" | "back" | "shoulders" | "biceps" | "triceps" | "abs" | "glutes" | "quads" | "hamstrings" | "calves")[];
         };
         /** WorkoutTypeRef */
         WorkoutTypeRef: {
@@ -1043,6 +1184,139 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suggest_exercises_api_workout_types__type_id__exercises_get: {
+        parameters: {
+            query?: {
+                day?: string | null;
+            };
+            header?: never;
+            path: {
+                type_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuscleSuggestionOut"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_muscles_api_muscles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuscleOut"][];
+                };
+            };
+        };
+    };
+    search_exercises_api_exercises_get: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogExerciseOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_exercise_api_exercises__exercise_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                exercise_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExerciseDetailOut"];
+                };
             };
             /** @description Not Found */
             404: {

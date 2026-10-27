@@ -5,6 +5,7 @@ import type { ErrorCode } from './types.ts'
 const ERROR_MESSAGES: Record<ErrorCode, string | null> = {
   session_not_found: 'No encontrado',
   workout_type_not_found: 'Ese tipo de entrenamiento ya no existe',
+  exercise_not_found: 'Ese ejercicio ya no está en el catálogo',
   duplicate_workout_type: 'Ya existe un tipo con ese nombre',
   session_without_type: 'Elige antes el tipo de entrenamiento',
   assessment_unavailable: null,

@@ -23,6 +23,15 @@
   width: 100%;
 }
 
+.muscle-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0;
+  padding: 0;
+  border: 0;
+}
+
 .type-list {
   background: var(--surface);
   border: 1px solid var(--border);

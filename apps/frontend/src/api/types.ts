@@ -9,6 +9,12 @@ export type WorkoutTypeInput = Schemas['WorkoutTypeIn']
 export type WorkoutTypeRef = Schemas['WorkoutTypeRef']
 export type WorkoutType = Schemas['WorkoutTypeOut']
 
+export type Muscle = Schemas['MuscleOut']['id']
+export type MuscleOption = Schemas['MuscleOut']
+export type MuscleSuggestion = Schemas['MuscleSuggestionOut']
+export type CatalogExercise = Schemas['CatalogExerciseOut']
+export type ExerciseDetail = Schemas['ExerciseDetailOut']
+
 export type SessionSummary = Schemas['SessionSummary']
 export type SessionDetail = Schemas['SessionDetail']
 export type SessionStats = Schemas['SessionStats']

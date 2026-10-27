@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { fetchMuscles } from '../../api/exercises.ts'
 import type { WorkoutType } from '../../api/types.ts'
 import {
   createWorkoutType,
@@ -13,6 +14,9 @@ import './workout-types.css'
 
 export default function WorkoutTypesPage() {
   const { state, reload } = useFetch(fetchWorkoutTypes, 'types')
+  const muscles = useFetch(fetchMuscles, 'muscles')
+  const muscleName = (id: string) =>
+    (muscles.state.status === 'ok' && muscles.state.data.find((m) => m.id === id)?.name) || id
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -65,6 +69,9 @@ export default function WorkoutTypesPage() {
                       {CATEGORY_LABELS[type.category]} ·{' '}
                       {type.session_count === 1 ? '1 sesión' : `${type.session_count} sesiones`}
                     </p>
+                    {type.muscles.length > 0 && (
+                      <p className="muted small">{type.muscles.map(muscleName).join(', ')}</p>
+                    )}
                   </div>
                   <div className="row-actions">
                     <button type="button" className="link-button" onClick={() => setEditingId(type.id)}>

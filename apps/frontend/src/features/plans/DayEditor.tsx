@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { WorkoutType } from '../../api/types.ts'
+import ExerciseNameInput from '../exercises/ExerciseNameInput.tsx'
 import { emptyExercise, sameName, type DraftDay, type DraftExercise } from './planDraft.ts'
 import { WEEKDAYS } from './weeks.ts'
 
@@ -128,13 +129,10 @@ export default function DayEditor({ day, types, newTypes, onChange, onRemove }: 
         {day.exercises.map((exercise) => (
           <div key={exercise.key} className="exercise-editor">
             <div className="day-editor-row">
-              <input
-                className="text-input"
-                placeholder="Ejercicio"
-                aria-label="Ejercicio"
-                maxLength={80}
-                value={exercise.name}
-                onChange={(e) => updateExercise(exercise.key, { name: e.target.value })}
+              <ExerciseNameInput
+                name={exercise.name}
+                catalogId={exercise.catalogId ?? null}
+                onChange={(name, catalogId) => updateExercise(exercise.key, { name, catalogId })}
               />
               <button
                 type="button"

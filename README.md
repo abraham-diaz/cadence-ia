@@ -1,25 +1,45 @@
-# cadence-ia
+<div align="center">
+<img src="apps/frontend/public/icon-192.png" alt="Cadence IA Logo" width="100"/>
 
-A personal training assistant that reads the workouts exported by my **Fitbit** (TCX files),
-analyzes the heart-rate curve and tells me how the session went, in the spirit of what Google
-does with Gemini, but built by me and running on a Raspberry Pi at home.
+# Cadence IA
 
-It is a mobile-first web app (installable on the iPhone home screen) backed by a small Python API.
+### Self-hosted training assistant that reads your heart rate
 
-## What it does
+![Python](https://img.shields.io/badge/Python_3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white) ![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white) ![ECharts](https://img.shields.io/badge/ECharts-AA344D?style=for-the-badge&logo=apacheecharts&logoColor=white) ![Gemini](https://img.shields.io/badge/Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Raspberry Pi](https://img.shields.io/badge/Raspberry_Pi_4-A22846?style=for-the-badge&logo=raspberrypi&logoColor=white)
 
-- **Reads Fitbit TCX exports**: time + heart rate for every sample, plus GPS, altitude and distance
-  when the workout has them.
-- **Finds sets and rests in strength sessions** from the heart-rate curve alone: HR rises during a
-  set and falls during the rest. The detection threshold adapts to each session (5 % of its average
-  HR), so it keeps working as fitness improves or for a different person.
-- **Measures recovery**: how many bpm the heart rate drops 30 s and 60 s into each rest.
-- **Lets you label each workout** with your own types ("Legs", "Upper body", "Walk"…), each one
-  either *strength* or *cardio*.
-- **Compares each session** with the average of your last 5 sessions of the same type, and charts
-  how your average HR and recovery evolve over time.
-- **Writes an assessment with an LLM** (Gemini): headline, summary, strengths, things to improve
-  and one piece of advice for next time. Only the metrics are sent, never the raw file.
+</div>
+
+---
+
+## What is Cadence IA?
+
+Cadence IA is a personal training assistant. It reads the workouts exported by a **Fitbit** (TCX
+files), analyzes the heart-rate curve and tells you how the session went — in the spirit of what
+Google does with Gemini, but self-built and running on a Raspberry Pi at home.
+
+It's a mobile-first PWA, installed on the iPhone home screen, backed by a small Python API.
+
+<div align="center">
+<img src="docs/screenshots/session-assessment.png" alt="Session metrics and AI assessment" width="280"/>
+&nbsp;&nbsp;
+<img src="docs/screenshots/session-chart.png" alt="Heart-rate curve with sets shaded" width="280"/>
+</div>
+
+---
+
+## Features
+
+- **TCX import** — time and heart rate for every sample, plus GPS, altitude and distance when present
+- **Sets and rests from HR alone** — HR rises during a set and falls during the rest; the threshold adapts to each session (5 % of its average HR)
+- **Recovery** — how many bpm the heart rate drops 30 s and 60 s into each rest
+- **Workout types** — your own labels ("Legs", "Walk"…), each one *strength* or *cardio*
+- **Comparisons** — each session against the average of your last 5 of the same type, with history charts
+- **AI assessment** — Gemini writes a headline, summary, strengths, things to improve and one tip; only metrics are sent, never the raw file
+- **Training plans** — design a plan by chatting with a Gemini coach, review and edit it, then track the week's progress against it
+- **Exercise catalog** — names, pictures and how-to steps from [wger.de](https://wger.de), stored locally
+- **PWA** — installable, light/dark theme from the system, swipeable tabs
+
+---
 
 ## How it works
 
@@ -35,280 +55,217 @@ flowchart LR
 ```
 
 1. The watch export lands in an iCloud Drive folder.
-2. On the Raspberry Pi, a systemd timer runs `rclone copy` and then `cadence-ia ingest`, which
-   parses every TCX not yet in the database, computes its metrics and stores them in SQLite.
-3. FastAPI serves the data and the compiled React app on the home network.
-4. From the phone you pick the workout type, see the HR curve with the sets shaded, the
-   comparison with previous sessions, and ask for the AI assessment.
+2. On the Pi, a systemd timer runs `rclone copy` and then `cadence-ia ingest`, which analyzes every new TCX and stores it in SQLite.
+3. FastAPI serves the API and the compiled React app.
+4. From the phone you label the workout, see the HR curve with the sets shaded, compare it with previous sessions and ask for the AI assessment.
 
-## Tech stack
+---
 
-| Layer      | Tools |
-|------------|-------|
-| Backend    | Python 3.11+, FastAPI, Pydantic, SQLite (`sqlite3` from the standard library) |
-| Analysis   | Pure Python: TCX parsing with `xml.etree`, resampling, smoothing, zigzag peak detection |
-| LLM        | Google Gemini (`google-genai`) with structured JSON output |
-| Frontend   | React 19, TypeScript, Vite, React Router, ECharts |
-| Deployment | Docker (multi-stage image), Raspberry Pi 4 (Debian 12), systemd timers, rclone (iCloud Drive) |
-| Tests      | pytest (backend), oxlint (frontend) |
+## Tech Stack
 
-## Repository layout
+| Layer | Technology |
+|---|---|
+| Frontend | React 19 · Vite · TypeScript · React Router · ECharts · Lucide |
+| Backend | Python 3.11+ · FastAPI · Pydantic |
+| Analysis | Pure Python: `xml.etree`, resampling, smoothing, zigzag peak detection |
+| Database | SQLite (`sqlite3` from the standard library), versioned migrations |
+| LLM | Google Gemini (`google-genai`) with structured JSON output |
+| Deployment | Docker (multi-stage) · Raspberry Pi 4 · systemd timers · rclone · Tailscale |
+| Tests | pytest · oxlint · tsc |
+
+---
+
+## Data Model
+
+```
+WorkoutType (strength | cardio)
+├─ Session (one per TCX: HR curve, stats)
+│  ├─ Segment (work | rest, recovery at 30 s / 60 s)
+│  └─ Assessment (Gemini JSON)
+└─ WorkoutTypeMuscle
+
+Plan (weeks that repeat in turn, one active)
+└─ PlanDay (week, weekday, workout type, minutes)
+   └─ PlanExercise (sets, reps) ─→ Exercise (wger catalog)
+                                   └─ ExerciseMuscle
+```
+
+---
+
+## Structure
 
 ```
 cadence-ia/
-├── apps/
-│   ├── backend/
-│   │   ├── src/cadence_ia/
-│   │   │   ├── domain/        # pure workout logic: activity, HR analysis, comparison
-│   │   │   ├── importers/     # file formats → domain objects (TCX)
-│   │   │   ├── storage/       # SQLite: migrations and one module per kind of record
-│   │   │   ├── llm/           # what the LLM receives, and Gemini behind an interface
-│   │   │   ├── services/      # use cases: ingest, session detail, assess...
-│   │   │   ├── api/           # FastAPI: schemas, errors and one module per route group
-│   │   │   ├── config.py      # settings, read from the environment in one place
-│   │   │   ├── main.py        # builds the web app (`create_app`)
-│   │   │   ├── cli.py         # `cadence-ia` command
-│   │   │   └── frontend.py    # serves the built React app
-│   │   └── tests/
-│   └── frontend/              # React + Vite + TypeScript PWA
-│       ├── openapi.json       # the API schema, exported by the backend
-│       └── src/
-│           ├── api/           # HTTP client, error messages, generated types
-│           ├── features/      # sessions, workout-types, assessment (pages, components, CSS)
-│           ├── shared/        # pieces used by several features
-│           ├── styles/        # design tokens, base styles, shared controls
-│           └── app/           # routes
-├── deploy/
-│   ├── sync.sh                # rclone copy + ingest
-│   ├── backup.sh              # daily SQLite backup
-│   └── systemd/               # timers for both scripts
-├── Dockerfile                 # builds the frontend, then the Python image
-└── docker-compose.yml
+├─ apps/
+│  ├─ backend/
+│  │  ├─ src/cadence_ia/
+│  │  │  ├─ domain/         Pure workout logic: HR analysis, comparison, plans
+│  │  │  ├─ importers/      File formats → domain objects (TCX)
+│  │  │  ├─ storage/        SQLite: migrations + one module per record kind
+│  │  │  ├─ llm/            Assessor, coach and planner prompts; Gemini client
+│  │  │  ├─ services/       Use cases: ingest, assess, plans, exercises
+│  │  │  ├─ api/            FastAPI schemas, errors and routes
+│  │  │  ├─ config.py       Settings, read from the environment in one place
+│  │  │  ├─ main.py         App factory (create_app)
+│  │  │  └─ cli.py          cadence-ia command
+│  │  └─ tests/
+│  └─ frontend/             React + Vite PWA
+│     ├─ openapi.json       API schema exported by the backend
+│     └─ src/
+│        ├─ api/            HTTP client, error messages, generated types
+│        ├─ features/       home, sessions, plans, exercises, workout-types, assessment
+│        ├─ shared/         Pieces used by several features
+│        ├─ styles/         Design tokens and base styles
+│        └─ app/            Routes and tab bar
+├─ deploy/                  sync.sh, backup.sh and systemd timers
+├─ Dockerfile
+└─ docker-compose.yml
 ```
 
-### Backend layers
-
-Each layer only imports the ones below it, and `tests/test_architecture.py` enforces it:
+Backend layers only import the ones below them — `tests/test_architecture.py` enforces it:
 
 ```
 api, cli  →  services  →  storage, llm, importers  →  domain
 ```
 
-- **domain** is plain Python: no database, HTTP, files or LLM, so it can be tested on its own.
-- **storage** returns domain objects, never raw SQLite rows.
-- **services** hold the rules ("sets only show in strength sessions", "only typed sessions can be
-  assessed") and raise errors with a stable `code`; the API turns them into HTTP responses.
-- **api** routes only translate between HTTP and the services.
+---
 
-## Getting started (development)
+## Getting Started
 
-Requirements: Python 3.11+, Node.js 20.19+.
+### Prerequisites
 
-### Backend
+- Python 3.11+
+- Node.js 20.19+
+- A [Gemini API key](https://aistudio.google.com/apikey) (free tier is enough)
+
+### Setup
+
+**1. Install the backend:**
 
 ```bash
 cd apps/backend
 python -m venv .venv
 source .venv/bin/activate          # Windows (Git Bash): source .venv/Scripts/activate
 pip install -e ".[dev]"
-cp .env.example .env               # then fill in the values (see below)
 ```
 
-Store your TCX files in the database, then start the API:
+**2. Configure it** — copy `.env.example` to `apps/backend/.env`:
+
+```env
+GEMINI_API_KEY=your-key
+GEMINI_MODEL=gemini-3.8-flash
+CADENCE_DATA_DIR=tests/data
+CADENCE_DB=data/cadence.db
+```
+
+**3. Load your workouts and the exercise catalog:**
 
 ```bash
-cadence-ia ingest                  # reads CADENCE_DATA_DIR, writes CADENCE_DB
-uvicorn cadence_ia.main:create_app --factory --reload
+cadence-ia ingest
+cadence-ia exercises sync
 ```
 
-The interactive API docs are at <http://127.0.0.1:8000/docs>.
-
-### Frontend
+**4. Install the frontend and start development:**
 
 ```bash
 cd apps/frontend
 npm install
-npm run dev        # starts the API (uvicorn --reload) and Vite; Ctrl+C stops both
+npm run dev
 ```
 
-Open <http://localhost:5173>. `npm run dev` reuses an API already running on port 8000, and
-`npm run dev:web` starts only Vite. Vite proxies `/api` to port 8000 and listens on the local
-network, so you can open `http://<your-pc-ip>:5173` from the phone.
+Web runs on `http://localhost:5173`, API on `http://localhost:8000` (docs at `/docs`). Vite listens
+on the local network, so you can open `http://<your-pc-ip>:5173` from the phone.
 
-### Configuration
+---
 
-Settings are read from environment variables or from `apps/backend/.env` (never committed; see
-`.env.example`):
+## Production
 
-| Variable           | Default                    | Purpose |
-|--------------------|----------------------------|---------|
-| `GEMINI_API_KEY`   | –                          | Key for the AI assessment ([get one](https://aistudio.google.com/apikey)) |
-| `GEMINI_MODEL`     | `gemini-3.8-flash`         | Gemini model used for the assessment |
-| `CADENCE_DATA_DIR` | `~/cadencia-ia/entrada`    | Folder with the `.tcx` files |
-| `CADENCE_DB`       | `~/cadencia-ia/cadence.db` | SQLite database file |
-
-For development, point them to the repo, e.g. `CADENCE_DATA_DIR=tests/data` and
-`CADENCE_DB=data/cadence.db`.
-
-### Command line
-
-```bash
-cadence-ia show path/to/workout.tcx   # print a summary and the sets/rests table
-cadence-ia ingest                     # store new TCX files in the database
-cadence-ia ingest --force             # re-analyze every file (keeps your workout types)
-cadence-ia exercises sync             # download or refresh the exercise catalog from wger.de
-cadence-ia openapi <file>             # write the API schema as JSON
-```
-
-The exercise catalog (names, pictures and how-to steps, CC BY-SA) comes from the open API of
-[wger.de](https://wger.de). It's stored in SQLite, so the app never calls wger while in use.
-
-### API types in the frontend
-
-The frontend's TypeScript types are generated from the API, so they can't drift apart. After
-changing the API:
-
-```bash
-cd apps/backend && cadence-ia openapi ../frontend/openapi.json
-cd apps/frontend && npm run gen:api   # writes src/api/schema.d.ts
-```
-
-A backend test fails if `openapi.json` is out of date. Errors carry a `code`; the message shown
-for each one lives in `src/api/client.ts`, and a new code won't compile until it has one.
-
-### Tests
-
-```bash
-cd apps/backend && pytest             # backend
-cd apps/frontend && npm run lint && npx tsc -b   # frontend
-```
-
-The tests build synthetic TCX files, so they run without any personal data. A few extra tests use
-a real workout from `tests/data/` and are skipped when it isn't there (TCX files are git-ignored).
-
-## Deployment (Raspberry Pi)
-
-The app runs as one Docker container: a multi-stage build compiles the React app with Node and
-copies it into a slim Python image, where FastAPI serves both the API and the web app on port
-8000. rclone stays on the host (its iCloud session has to be renewed by hand now and then), and
-two systemd timers drive the rest:
+The app runs as a single Docker container: Node compiles the React app and a slim Python image
+serves it together with the API on port 8000. rclone stays on the host, and two systemd timers do
+the rest:
 
 | Timer | Runs | What it does |
-|-------|------|--------------|
-| `cadence-sync.timer` | every 15 min | `rclone copy` from iCloud, then `cadence-ia ingest` in the container |
-| `cadence-backup.timer` | daily, 03:30 | consistent SQLite backup, keeping the last 14 |
+|---|---|---|
+| `cadence-sync.timer` | Every 15 min | `rclone copy` from iCloud, then `cadence-ia ingest` in the container |
+| `cadence-backup.timer` | Daily, 03:30 | Consistent SQLite backup, keeping the last 14 |
 
-Data lives on the host, mounted into the container, so rebuilding the image never touches it:
+Data lives on the host (`~/cadencia-ia/entrada` for TCX, `~/cadencia-ia/data` for the database),
+mounted into the container, so rebuilding never touches it.
 
-| Host | Container | |
-|------|-----------|---|
-| `~/cadencia-ia/entrada` | `/data/tcx` (read only) | TCX files downloaded by rclone |
-| `~/cadencia-ia/data` | `/data/db` | `cadence.db` and `backups/` |
-
-### First install
-
-Assumes rclone is already configured with an `icloud` remote.
+**First install** (assumes rclone has an `icloud` remote):
 
 ```bash
-# Docker and git
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER      # then log out and back in
-sudo apt install -y git
-
-# Code, data folder and secrets
-git clone https://github.com/abraham-diaz/cadence-ia.git ~/cadence-ia
-cd ~/cadence-ia
+curl -fsSL https://get.docker.com | sh && sudo usermod -aG docker $USER
+git clone https://github.com/abraham-diaz/cadence-ia.git ~/cadence-ia && cd ~/cadence-ia
 mkdir -p ~/cadencia-ia/entrada ~/cadencia-ia/data
-cp apps/backend/.env.example apps/backend/.env
-nano apps/backend/.env             # set GEMINI_API_KEY
-chmod 600 apps/backend/.env
-
-# Build and start (the first build on a Pi 4 takes a few minutes)
+cp apps/backend/.env.example apps/backend/.env && chmod 600 apps/backend/.env   # set GEMINI_API_KEY
 docker compose up -d --build
-
-# First sync by hand, then enable the timers
-bash deploy/sync.sh
-docker exec cadence-ia cadence-ia exercises sync
-sudo cp deploy/systemd/* /etc/systemd/system/
-sudo systemctl daemon-reload
+bash deploy/sync.sh && docker exec cadence-ia cadence-ia exercises sync
+sudo cp deploy/systemd/* /etc/systemd/system/ && sudo systemctl daemon-reload
 sudo systemctl enable --now cadence-sync.timer cadence-backup.timer
 ```
 
-Then open `http://<pi-ip>:8000` on the phone and use *Share → Add to Home Screen*.
-
-#### Access from anywhere (Tailscale)
-
-To use the app away from home without exposing it to the internet, put the Pi and the phone in
-the same [Tailscale](https://tailscale.com) network, enable *HTTPS Certificates* in the Tailscale
-admin console (DNS page) and run:
-
-```bash
-sudo tailscale serve --bg 8000
-```
-
-The app is then available, with a valid HTTPS certificate, at
-`https://<pi-name>.<your-tailnet>.ts.net` from any device in your tailnet.
-
-The container runs as uid 1000 (the first user on Raspberry Pi OS / Debian). If your user has a
-different uid, build with `docker compose build --build-arg UID=$(id -u)`.
-
-### Updating
+**Update:**
 
 ```bash
 cd ~/cadence-ia && git pull && docker compose up -d --build
-docker exec cadence-ia cadence-ia exercises sync   # when the catalog changed (e.g. a new migration)
 ```
 
-### Useful commands
+**Access from anywhere** — put the Pi and the phone in the same [Tailscale](https://tailscale.com)
+network, enable *HTTPS Certificates* and run `sudo tailscale serve --bg 8000`. The app is then at
+`https://<pi-name>.<your-tailnet>.ts.net`, with a valid certificate and without exposing it to the
+internet. Add it to the home screen with *Share → Add to Home Screen*.
 
-```bash
-docker compose logs -f                     # API logs
-systemctl list-timers 'cadence-*'          # next runs
-journalctl -u cadence-sync -n 50           # last sync / ingest output
-rclone config reconnect icloud:            # when the iCloud session expires
-```
+---
 
-## API
+## Commands
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET`    | `/api/sessions` | List sessions, newest first |
-| `GET`    | `/api/sessions/{id}` | Session detail: HR curve, sets/rests, stats, comparison, history, assessment |
-| `PUT`    | `/api/sessions/{id}/workout-type` | Set (or clear) the session's workout type |
-| `POST`   | `/api/sessions/{id}/assessment` | Ask the LLM for a new assessment and store it |
-| `GET`    | `/api/workout-types` | List workout types |
-| `POST`   | `/api/workout-types` | Create a workout type |
-| `PUT`    | `/api/workout-types/{id}` | Rename or re-categorize a type |
-| `DELETE` | `/api/workout-types/{id}` | Delete a type (its sessions become unlabeled) |
-| `GET`    | `/api/health` | Health check |
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the API (uvicorn `--reload`) and Vite together |
+| `npm run dev:web` | Start only Vite |
+| `npm run build` | Type-check and build the frontend |
+| `npm run lint` | Lint the frontend (oxlint) |
+| `npm run gen:api` | Generate `src/api/schema.d.ts` from `openapi.json` |
+| `pytest` | Run the backend tests |
+| `cadence-ia show <file.tcx>` | Print a summary and the sets/rests table |
+| `cadence-ia ingest [--force]` | Store new TCX files (`--force` re-analyzes all, keeping types) |
+| `cadence-ia exercises sync` | Download or refresh the wger exercise catalog |
+| `cadence-ia openapi <file>` | Write the API schema as JSON |
+| `rclone config reconnect icloud:` | Renew the iCloud session when it expires |
 
-## Notes and limitations
+After changing the API, run `cadence-ia openapi ../frontend/openapi.json` and `npm run gen:api`; a
+backend test fails if `openapi.json` is out of date.
 
-- **Heart rate is not load.** In strength training the HR curve shows the pattern of effort and
-  rest, not the weight lifted. Fitbit's calories are only an estimate.
-- **Fitbit tags every workout as `Sport="Other"`**, which is why the workout type is chosen by hand.
-- **Privacy:** on Gemini's free tier, Google may use the requests to improve its products. The app
-  only sends aggregated metrics (type, duration, HR, sets, recovery): no GPS, device, file names or
-  personal data.
-- **Database migrations:** the database stores user data (workout types, assessments), so schema
-  changes are versioned migrations in `storage/database.py` (`PRAGMA user_version`), never a
-  rebuild.
+---
+
+## Notes
+
+- **Heart rate is not load.** In strength training the HR curve shows effort and rest, not the weight lifted.
+- **Fitbit tags every workout as `Sport="Other"`**, so the workout type is chosen by hand.
+- **Privacy:** on Gemini's free tier Google may use requests to improve its products, so only aggregated metrics are sent — no GPS, device or file names.
+- **Migrations:** the database holds user data, so schema changes are versioned migrations (`PRAGMA user_version`), never a rebuild.
+
+---
 
 ## Roadmap
 
-- [x] **1. TCX reader** with a CLI to try it out
-- [x] **2. Heart-rate metrics**: sets, rests and recovery, with an adaptive threshold
-- [x] **3. REST API** with FastAPI
-- [x] **4. Mobile-first frontend**: session list and detail with the HR curve
-- [x] **5. SQLite history**: ingestion, workout types (CRUD) and comparisons between sessions
-- [x] **6. AI assessment** with Gemini, shown in the frontend
-- [x] **7. Deployment on the Raspberry Pi**: Docker image serving API + frontend, rclone + ingest
-      timer, daily database backups, HTTPS access from anywhere through Tailscale
-- [ ] Alerts when the rclone iCloud session expires (ntfy, Telegram…)
-- [ ] Cardio sessions: pace, per-km splits, smoothed elevation and a route map coloured by HR
-- [ ] Heart-rate zones once the max HR is known
-- [ ] Optional notes per workout (exercises, weights, reps) to cross with the HR curve
+- [x] TCX reader, HR metrics, REST API and mobile-first frontend
+- [x] SQLite history, workout types and comparisons
+- [x] AI assessment with Gemini
+- [x] Deployment on the Raspberry Pi with Docker, timers, backups and Tailscale
+- [x] Training plans with a Gemini coach and weekly progress
+- [x] Exercise catalog with how-to pages
+- [ ] Alert when the rclone iCloud session expires
+- [ ] Web Push notifications when a workout is analyzed
+- [ ] Cardio with GPS: pace, splits, smoothed elevation and route map
+- [ ] Heart-rate zones
+- [ ] Log exercises and weight lifted per session
 
-## Author
+---
+
+<div align="center">
 
 Abraham Díaz · [github.com/abraham-diaz](https://github.com/abraham-diaz)
+
+</div>

@@ -1,8 +1,9 @@
 import sqlite3
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 
+from cadence_ia.domain.exercise import CatalogExercise, Muscle, find_by_name
 from cadence_ia.domain.plan import Exercise, Plan, PlanDay, cycle_start
 from cadence_ia.domain.week_progress import WeekProgress, week_progress
 from cadence_ia.domain.week_summary import week_summary
@@ -11,13 +12,14 @@ from cadence_ia.llm.coach import ChatMessage, Coach, build_context
 from cadence_ia.llm.errors import LLMUnavailable
 from cadence_ia.llm.planner import PlanExtractor
 from cadence_ia.services.errors import Conflict, InvalidInput, Unavailable
-from cadence_ia.storage import plans, sessions, workout_types
+from cadence_ia.storage import exercises, plans, sessions, workout_types
 
 
 @dataclass(frozen=True)
 class NewType:
     name: str
     category: Category
+    muscles: tuple[Muscle, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -84,6 +86,7 @@ def propose(
     except LLMUnavailable as err:
         raise Unavailable("coach_unavailable", str(err)) from err
 
+    catalog = exercises.list_all(conn)
     days = []
     for week, week_draft in enumerate(draft.weeks):
         for day in week_draft.days:
@@ -99,16 +102,35 @@ def propose(
                     workout_type_id=existing.id if existing else None,
                     minutes=max(1, day.minutes),
                     note=(day.note or "").strip() or None,
-                    exercises=tuple(
-                        Exercise(name=e.name.strip(), sets=e.sets, reps=e.reps)
-                        for e in day.exercises
-                        if e.name.strip()
+                    exercises=_link(
+                        catalog,
+                        tuple(
+                            Exercise(name=e.name.strip(), sets=e.sets, reps=e.reps)
+                            for e in day.exercises
+                            if e.name.strip()
+                        ),
                     ),
                 )
             )
     if not days:
         raise Conflict("no_plan_in_chat", "No plan has been agreed in the chat yet")
     return Proposal(title=draft.title.strip(), weeks=max(1, len(draft.weeks)), days=days)
+
+
+def _link(catalog: list[CatalogExercise], items: tuple[Exercise, ...]) -> tuple[Exercise, ...]:
+    """Point each exercise to its catalog entry: the one picked, or the one with the same name."""
+    known = {e.id: e for e in catalog}
+    linked = []
+    for item in items:
+        match = known.get(item.catalog_id) if item.catalog_id else find_by_name(catalog, item.name)
+        linked.append(
+            replace(
+                item,
+                catalog_id=match.id if match else None,
+                image_url=match.image_url if match else None,
+            )
+        )
+    return tuple(linked)
 
 
 def save(
@@ -128,6 +150,7 @@ def save(
 
     # Checked everything first: a bad request doesn't leave new types behind.
     resolved: dict[str, WorkoutType] = {}
+    catalog = exercises.list_all(conn) if any(d.exercises for d in days) else []
     plan_days = [
         PlanDay(
             week=day.week,
@@ -135,7 +158,7 @@ def save(
             workout_type=_resolve(conn, day.workout_type, resolved),
             minutes=day.minutes,
             note=day.note,
-            exercises=day.exercises,
+            exercises=_link(catalog, day.exercises),
         )
         for day in days
     ]
@@ -174,7 +197,7 @@ def _resolve(
     if key not in resolved:
         existing = workout_types.find_by_name(conn, choice.name)
         if existing is None:
-            type_id = workout_types.create_type(conn, choice.name, choice.category)
+            type_id = workout_types.create_type(conn, choice.name, choice.category, choice.muscles)
             existing = workout_types.get_type(conn, type_id).workout_type
         resolved[key] = existing
     return resolved[key]

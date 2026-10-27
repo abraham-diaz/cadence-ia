@@ -6,6 +6,7 @@ from pathlib import Path
 from cadence_ia.config import Settings
 from cadence_ia.domain.heart_rate import analyze
 from cadence_ia.importers.tcx import parse_tcx
+from cadence_ia.services.exercises import EmptyCatalog, sync_catalog
 from cadence_ia.services.ingest import ingest
 from cadence_ia.storage.database import connect
 
@@ -67,6 +68,19 @@ def run_ingest(folder: Path, db_file: Path, force: bool) -> int:
     return 1 if result.failed else 0
 
 
+def run_exercise_sync(db_file: Path) -> int:
+    conn = connect(db_file)
+    try:
+        total = sync_catalog(conn)
+    except (OSError, EmptyCatalog) as err:  # URLError is an OSError
+        print(f"Could not download the wger catalog: {err}")
+        return 1
+    finally:
+        conn.close()
+    print(f"Stored {total} exercises from wger.de in {db_file}")
+    return 0
+
+
 def write_openapi(file: Path) -> None:
     # Imported here: the other commands don't need to load the web app.
     from cadence_ia.main import create_app
@@ -91,6 +105,12 @@ def main(argv: list[str] | None = None) -> int:
     ingest_cmd.add_argument("--force", action="store_true",
                             help="analyze again files already stored")
 
+    exercises_cmd = commands.add_parser("exercises", help="exercise catalog from wger.de")
+    exercises_sub = exercises_cmd.add_subparsers(dest="action", required=True)
+    sync_cmd = exercises_sub.add_parser("sync", help="download or refresh the catalog")
+    sync_cmd.add_argument("--db", type=Path, default=None,
+                          help="SQLite file (default: $CADENCE_DB)")
+
     openapi_cmd = commands.add_parser("openapi", help="write the API schema as JSON")
     openapi_cmd.add_argument("file", type=Path, help="where to write it")
 
@@ -102,6 +122,8 @@ def main(argv: list[str] | None = None) -> int:
         write_openapi(args.file)
         return 0
     settings = Settings.from_env()
+    if args.command == "exercises":
+        return run_exercise_sync(args.db or settings.db_path)
     return run_ingest(args.data_dir or settings.data_dir, args.db or settings.db_path, args.force)
 
 

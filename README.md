@@ -156,8 +156,12 @@ For development, point them to the repo, e.g. `CADENCE_DATA_DIR=tests/data` and
 cadence-ia show path/to/workout.tcx   # print a summary and the sets/rests table
 cadence-ia ingest                     # store new TCX files in the database
 cadence-ia ingest --force             # re-analyze every file (keeps your workout types)
+cadence-ia exercises sync             # download or refresh the exercise catalog from wger.de
 cadence-ia openapi <file>             # write the API schema as JSON
 ```
+
+The exercise catalog (names, pictures and how-to steps, CC BY-SA) comes from the open API of
+[wger.de](https://wger.de). It's stored in SQLite, so the app never calls wger while in use.
 
 ### API types in the frontend
 
@@ -224,6 +228,7 @@ docker compose up -d --build
 
 # First sync by hand, then enable the timers
 bash deploy/sync.sh
+docker exec cadence-ia cadence-ia exercises sync
 sudo cp deploy/systemd/* /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now cadence-sync.timer cadence-backup.timer
@@ -251,6 +256,7 @@ different uid, build with `docker compose build --build-arg UID=$(id -u)`.
 
 ```bash
 cd ~/cadence-ia && git pull && docker compose up -d --build
+docker exec cadence-ia cadence-ia exercises sync   # when the catalog changed (e.g. a new migration)
 ```
 
 ### Useful commands

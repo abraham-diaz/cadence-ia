@@ -6,6 +6,7 @@ from typing import Literal
 ErrorCode = Literal[
     "session_not_found",
     "workout_type_not_found",
+    "exercise_not_found",
     "duplicate_workout_type",
     "session_without_type",
     "assessment_unavailable",

@@ -168,7 +168,7 @@ def test_proposal_matches_existing_types_and_cleans_up(client, extractor, conn):
     upper, walk, friday = data["days"]  # the day with weekday 9 is dropped
     assert upper["type_name"] == "tren superior"
     assert upper["workout_type_id"] is None
-    assert upper["exercises"] == [{"name": "Press de pecho", "sets": 3, "reps": "10-12"}]
+    assert upper["exercises"] == [{"name": "Press de pecho", "sets": 3, "reps": "10-12", "catalog_id": None, "image_url": None}]
     assert walk == {
         "week": 0,
         "weekday": 2,
@@ -227,7 +227,7 @@ def test_save_creates_new_types_once(client, conn):
     assert first["workout_type"]["name"] == "Tren superior"
     assert second["workout_type"] == first["workout_type"]  # "tren SUPERIOR" is the same type
     assert walk["workout_type"]["name"] == "Caminata"
-    assert first["exercises"] == [{"name": "Press de pecho", "sets": 3, "reps": "10-12"}]
+    assert first["exercises"] == [{"name": "Press de pecho", "sets": 3, "reps": "10-12", "catalog_id": None, "image_url": None}]
     assert first["note"] == "Para si molesta la rodilla."
     assert walk["note"] is None
 

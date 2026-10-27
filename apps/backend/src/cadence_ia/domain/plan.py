@@ -11,6 +11,8 @@ class Exercise:
     name: str
     sets: int | None
     reps: str | None  # text: "10-12", "30 s"...
+    catalog_id: int | None = None  # the wger exercise it is, to show how it's done
+    image_url: str | None = None  # read from the catalog, not stored with the plan
 
 
 @dataclass(frozen=True)

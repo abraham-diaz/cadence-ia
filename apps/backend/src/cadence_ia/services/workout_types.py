@@ -1,5 +1,6 @@
 import sqlite3
 
+from cadence_ia.domain.exercise import Muscle
 from cadence_ia.domain.workout_type import Category, WorkoutTypeUsage
 from cadence_ia.services.errors import Conflict, NotFound
 from cadence_ia.storage import workout_types
@@ -26,19 +27,25 @@ def get_type(conn: sqlite3.Connection, type_id: int) -> WorkoutTypeUsage:
     return usage
 
 
-def create_type(conn: sqlite3.Connection, name: str, category: Category) -> WorkoutTypeUsage:
+def create_type(
+    conn: sqlite3.Connection, name: str, category: Category, muscles: tuple[Muscle, ...] = ()
+) -> WorkoutTypeUsage:
     try:
-        type_id = workout_types.create_type(conn, name, category)
+        type_id = workout_types.create_type(conn, name, category, muscles)
     except DuplicateName:
         raise _duplicate(name)
     return get_type(conn, type_id)
 
 
 def update_type(
-    conn: sqlite3.Connection, type_id: int, name: str, category: Category
+    conn: sqlite3.Connection,
+    type_id: int,
+    name: str,
+    category: Category,
+    muscles: tuple[Muscle, ...] = (),
 ) -> WorkoutTypeUsage:
     try:
-        found = workout_types.update_type(conn, type_id, name, category)
+        found = workout_types.update_type(conn, type_id, name, category, muscles)
     except DuplicateName:
         raise _duplicate(name)
     if not found:

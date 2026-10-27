@@ -35,9 +35,12 @@ def save_plan(
                 ),
             ).lastrowid
             conn.executemany(
-                """INSERT INTO plan_exercises (plan_day_id, position, name, sets, reps)
-                   VALUES (?, ?, ?, ?, ?)""",
-                [(day_id, i, e.name, e.sets, e.reps) for i, e in enumerate(day.exercises)],
+                """INSERT INTO plan_exercises (plan_day_id, position, name, sets, reps, catalog_id)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                [
+                    (day_id, i, e.name, e.sets, e.reps, e.catalog_id)
+                    for i, e in enumerate(day.exercises)
+                ],
             )
     return plan_id
 
@@ -75,14 +78,21 @@ def _days(conn: sqlite3.Connection, plan_id: int) -> tuple[PlanDay, ...]:
     ).fetchall()
     exercises: dict[int, list[Exercise]] = {}
     for e in conn.execute(
-        """SELECT e.plan_day_id, e.name, e.sets, e.reps
+        """SELECT e.plan_day_id, e.name, e.sets, e.reps, e.catalog_id, c.image_url
            FROM plan_exercises e JOIN plan_days d ON d.id = e.plan_day_id
+           LEFT JOIN exercises c ON c.id = e.catalog_id
            WHERE d.plan_id = ?
            ORDER BY e.plan_day_id, e.position""",
         (plan_id,),
     ):
         exercises.setdefault(e["plan_day_id"], []).append(
-            Exercise(name=e["name"], sets=e["sets"], reps=e["reps"])
+            Exercise(
+                name=e["name"],
+                sets=e["sets"],
+                reps=e["reps"],
+                catalog_id=e["catalog_id"],
+                image_url=e["image_url"],
+            )
         )
     return tuple(
         PlanDay(
@@ -99,3 +109,18 @@ def _days(conn: sqlite3.Connection, plan_id: int) -> tuple[PlanDay, ...]:
         )
         for row in rows
     )
+
+
+def unlinked_exercise_names(conn: sqlite3.Connection) -> list[str]:
+    """Names of plan exercises not pointing to the catalog yet, in any plan version."""
+    rows = conn.execute("SELECT DISTINCT name FROM plan_exercises WHERE catalog_id IS NULL")
+    return [row["name"] for row in rows]
+
+
+def link_exercises(conn: sqlite3.Connection, links: dict[str, int]) -> None:
+    """Set the catalog entry of the unlinked plan exercises with these names."""
+    with conn:
+        conn.executemany(
+            "UPDATE plan_exercises SET catalog_id = ? WHERE name = ? AND catalog_id IS NULL",
+            [(catalog_id, name) for name, catalog_id in links.items()],
+        )

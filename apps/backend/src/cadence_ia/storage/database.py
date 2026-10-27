@@ -91,6 +91,37 @@ MIGRATIONS = [
         PRIMARY KEY (plan_day_id, position)
     );
     """,
+    # 5: exercise catalog downloaded from wger, and the muscles each workout type trains
+    """
+    CREATE TABLE exercises (
+        id        INTEGER PRIMARY KEY,    -- wger's id
+        name_es   TEXT,
+        name_en   TEXT,
+        image_url TEXT,
+        license   TEXT NOT NULL,          -- "CC-BY-SA 4"...: wger must be credited
+        author    TEXT
+    );
+
+    CREATE TABLE exercise_muscles (
+        exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+        muscle      TEXT NOT NULL,        -- one of domain.exercise.Muscle
+        is_primary  INTEGER NOT NULL,
+        PRIMARY KEY (exercise_id, muscle)
+    );
+
+    CREATE TABLE workout_type_muscles (
+        workout_type_id INTEGER NOT NULL REFERENCES workout_types(id) ON DELETE CASCADE,
+        muscle          TEXT NOT NULL,
+        PRIMARY KEY (workout_type_id, muscle)
+    );
+    """,
+    # 6: how to do each exercise, and the catalog entry a plan exercise refers to
+    """
+    ALTER TABLE exercises ADD COLUMN description TEXT;  -- plain text, one paragraph per line
+
+    ALTER TABLE plan_exercises
+        ADD COLUMN catalog_id INTEGER REFERENCES exercises(id) ON DELETE SET NULL;
+    """,
 ]
 
 

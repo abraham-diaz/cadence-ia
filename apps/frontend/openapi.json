@@ -429,6 +429,207 @@
         }
       }
     },
+    "/api/workout-types/{type_id}/exercises": {
+      "get": {
+        "tags": [
+          "workout types"
+        ],
+        "summary": "Suggest Exercises",
+        "description": "A few catalog exercises per muscle of the type; `day` (default today) picks which.",
+        "operationId": "suggest_exercises_api_workout_types__type_id__exercises_get",
+        "parameters": [
+          {
+            "name": "type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Type Id"
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MuscleSuggestionOut"
+                  },
+                  "title": "Response Suggest Exercises Api Workout Types  Type Id  Exercises Get"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/muscles": {
+      "get": {
+        "tags": [
+          "exercises"
+        ],
+        "summary": "List Muscles",
+        "description": "The muscle groups a workout type can train, in display order.",
+        "operationId": "list_muscles_api_muscles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MuscleOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Muscles Api Muscles Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exercises": {
+      "get": {
+        "tags": [
+          "exercises"
+        ],
+        "summary": "Search Exercises",
+        "description": "Catalog exercises whose name has every word of `q`, ignoring accents.",
+        "operationId": "search_exercises_api_exercises_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogExerciseOut"
+                  },
+                  "title": "Response Search Exercises Api Exercises Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exercises/{exercise_id}": {
+      "get": {
+        "tags": [
+          "exercises"
+        ],
+        "summary": "Get Exercise",
+        "description": "How to do it: picture, instructions and the muscles it trains.",
+        "operationId": "get_exercise_api_exercises__exercise_id__get",
+        "parameters": [
+          {
+            "name": "exercise_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Exercise Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseDetailOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plans/chat": {
       "post": {
         "tags": [
@@ -746,6 +947,53 @@
         ],
         "title": "AssessmentOut"
       },
+      "CatalogExerciseOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "license": {
+            "type": "string",
+            "title": "License"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "license",
+          "author"
+        ],
+        "title": "CatalogExerciseOut"
+      },
       "ChatMessageIn": {
         "properties": {
           "role": {
@@ -939,6 +1187,7 @@
             "enum": [
               "session_not_found",
               "workout_type_not_found",
+              "exercise_not_found",
               "duplicate_workout_type",
               "session_without_type",
               "assessment_unavailable",
@@ -955,6 +1204,81 @@
           "code"
         ],
         "title": "ErrorOut"
+      },
+      "ExerciseDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "license": {
+            "type": "string",
+            "title": "License"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "primary_muscles": {
+            "items": {
+              "$ref": "#/components/schemas/MuscleOut"
+            },
+            "type": "array",
+            "title": "Primary Muscles"
+          },
+          "secondary_muscles": {
+            "items": {
+              "$ref": "#/components/schemas/MuscleOut"
+            },
+            "type": "array",
+            "title": "Secondary Muscles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "image_url",
+          "license",
+          "author",
+          "description",
+          "primary_muscles",
+          "secondary_muscles"
+        ],
+        "title": "ExerciseDetailOut"
       },
       "ExerciseIn": {
         "properties": {
@@ -988,6 +1312,17 @@
               }
             ],
             "title": "Reps"
+          },
+          "catalog_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Id"
           }
         },
         "type": "object",
@@ -1023,13 +1358,37 @@
               }
             ],
             "title": "Reps"
+          },
+          "catalog_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Id"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
           }
         },
         "type": "object",
         "required": [
           "name",
           "sets",
-          "reps"
+          "reps",
+          "catalog_id",
+          "image_url"
         ],
         "title": "ExerciseOut"
       },
@@ -1166,6 +1525,56 @@
           "start_time"
         ],
         "title": "HistoryPoint"
+      },
+      "MuscleOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "chest",
+              "back",
+              "shoulders",
+              "biceps",
+              "triceps",
+              "abs",
+              "glutes",
+              "quads",
+              "hamstrings",
+              "calves"
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "MuscleOut"
+      },
+      "MuscleSuggestionOut": {
+        "properties": {
+          "muscle": {
+            "$ref": "#/components/schemas/MuscleOut"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogExerciseOut"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "type": "object",
+        "required": [
+          "muscle",
+          "exercises"
+        ],
+        "title": "MuscleSuggestionOut"
       },
       "PlanChatIn": {
         "properties": {
@@ -2126,6 +2535,26 @@
               "cardio"
             ],
             "title": "Category"
+          },
+          "muscles": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "chest",
+                "back",
+                "shoulders",
+                "biceps",
+                "triceps",
+                "abs",
+                "glutes",
+                "quads",
+                "hamstrings",
+                "calves"
+              ]
+            },
+            "type": "array",
+            "title": "Muscles",
+            "default": []
           }
         },
         "type": "object",
@@ -2156,6 +2585,25 @@
           "session_count": {
             "type": "integer",
             "title": "Session Count"
+          },
+          "muscles": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "chest",
+                "back",
+                "shoulders",
+                "biceps",
+                "triceps",
+                "abs",
+                "glutes",
+                "quads",
+                "hamstrings",
+                "calves"
+              ]
+            },
+            "type": "array",
+            "title": "Muscles"
           }
         },
         "type": "object",
@@ -2163,7 +2611,8 @@
           "id",
           "name",
           "category",
-          "session_count"
+          "session_count",
+          "muscles"
         ],
         "title": "WorkoutTypeOut"
       },

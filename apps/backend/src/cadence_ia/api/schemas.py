@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from cadence_ia.domain.assessment import Assessment
+from cadence_ia.domain.exercise import MUSCLE_NAMES, CatalogExercise, Muscle, MuscleSuggestion
 from cadence_ia.domain.plan import PlanDay
 from cadence_ia.domain.session import Session
 from cadence_ia.domain.week_progress import DayStatus, WeekProgress
@@ -18,6 +19,7 @@ class WorkoutTypeIn(BaseModel):
 
     name: str = Field(min_length=1, max_length=60)
     category: Category
+    muscles: list[Muscle] = []
 
 
 class SessionTypeIn(BaseModel):
@@ -32,6 +34,31 @@ class WorkoutTypeRef(BaseModel):
 
 class WorkoutTypeOut(WorkoutTypeRef):
     session_count: int
+    muscles: list[Muscle]
+
+
+class MuscleOut(BaseModel):
+    id: Muscle
+    name: str
+
+
+class CatalogExerciseOut(BaseModel):
+    id: int
+    name: str
+    image_url: str | None
+    license: str
+    author: str | None
+
+
+class ExerciseDetailOut(CatalogExerciseOut):
+    description: str | None  # one paragraph per line
+    primary_muscles: list[MuscleOut]
+    secondary_muscles: list[MuscleOut]
+
+
+class MuscleSuggestionOut(BaseModel):
+    muscle: MuscleOut
+    exercises: list[CatalogExerciseOut]
 
 
 class SegmentOut(BaseModel):
@@ -135,14 +162,17 @@ class ExerciseOut(BaseModel):
     name: str
     sets: int | None
     reps: str | None  # text: "10-12", "30 s"...
+    catalog_id: int | None  # the catalog entry, with how it's done; None if it isn't there
+    image_url: str | None
 
 
-class ExerciseIn(ExerciseOut):
+class ExerciseIn(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str = Field(min_length=1, max_length=80)
     sets: int | None = Field(default=None, ge=1, le=20)
     reps: str | None = Field(default=None, max_length=40)
+    catalog_id: int | None = None
 
 
 class ProposedDayOut(BaseModel):
@@ -236,7 +266,35 @@ class ErrorOut(BaseModel):
 
 
 def workout_type_out(usage: WorkoutTypeUsage) -> WorkoutTypeOut:
-    return WorkoutTypeOut(**asdict(usage.workout_type), session_count=usage.session_count)
+    return WorkoutTypeOut(
+        **asdict(usage.workout_type), session_count=usage.session_count, muscles=list(usage.muscles)
+    )
+
+
+def muscle_out(muscle: Muscle) -> MuscleOut:
+    return MuscleOut(id=muscle, name=MUSCLE_NAMES[muscle])
+
+
+def catalog_exercise_out(e: CatalogExercise) -> CatalogExerciseOut:
+    return CatalogExerciseOut(
+        id=e.id, name=e.name, image_url=e.image_url, license=e.license, author=e.author
+    )
+
+
+def exercise_detail_out(e: CatalogExercise) -> ExerciseDetailOut:
+    return ExerciseDetailOut(
+        **catalog_exercise_out(e).model_dump(),
+        description=e.description,
+        primary_muscles=[muscle_out(m) for m in e.primary_muscles],
+        secondary_muscles=[muscle_out(m) for m in e.secondary_muscles],
+    )
+
+
+def muscle_suggestion_out(suggestion: MuscleSuggestion) -> MuscleSuggestionOut:
+    return MuscleSuggestionOut(
+        muscle=muscle_out(suggestion.muscle),
+        exercises=[catalog_exercise_out(e) for e in suggestion.exercises],
+    )
 
 
 def session_summary(session: Session) -> SessionSummary:

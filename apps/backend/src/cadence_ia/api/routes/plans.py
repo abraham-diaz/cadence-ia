@@ -58,11 +58,15 @@ def save_plan(body: PlanIn, conn: Database) -> PlanOut:
             workout_type=(
                 day.workout_type_id
                 if day.workout_type_id is not None
-                else plans.NewType(day.new_type.name, day.new_type.category)
+                else plans.NewType(
+                    day.new_type.name, day.new_type.category, tuple(day.new_type.muscles)
+                )
             ),
             minutes=day.minutes,
             note=day.note or None,
-            exercises=tuple(Exercise(e.name, e.sets, e.reps or None) for e in day.exercises),
+            exercises=tuple(
+                Exercise(e.name, e.sets, e.reps or None, e.catalog_id) for e in day.exercises
+            ),
         )
         for day in body.days
     ]

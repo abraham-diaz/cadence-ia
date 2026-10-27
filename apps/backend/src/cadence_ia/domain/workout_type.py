@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal
 
+from cadence_ia.domain.exercise import Muscle
+
 Category = Literal["strength", "cardio"]
 
 
@@ -17,7 +19,8 @@ class WorkoutType:
 
 @dataclass(frozen=True)
 class WorkoutTypeUsage:
-    """A workout type and how many sessions have it."""
+    """A workout type, the muscles it trains and how many sessions have it."""
 
     workout_type: WorkoutType
     session_count: int
+    muscles: tuple[Muscle, ...] = ()

@@ -1,23 +1,18 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { fetchCurrentPlan } from '../../api/plans.ts'
-import type { Plan, PlanDay } from '../../api/types.ts'
+import type { Plan } from '../../api/types.ts'
 import { useFetch } from '../../shared/useFetch.ts'
 import { fromPlan, loadDraft, saveDraft } from './planDraft.ts'
 import './plans.css'
-import { describeDay, todayWeekday, WEEKDAYS, weekLetter } from './weeks.ts'
+import PlanWorkout from './PlanWorkout.tsx'
+import { todayWeekday, WEEKDAYS, weekLetter } from './weeks.ts'
 
 export default function PlanPage() {
   const { state } = useFetch(fetchCurrentPlan, 'current-plan')
 
   return (
     <main className="page">
-      <nav className="top-bar top-bar-end">
-        <Link to="/plan/nuevo" className="link-button">
-          Nuevo plan
-        </Link>
-      </nav>
-
       {state.status === 'loading' && <p className="muted">Cargando…</p>}
       {state.status === 'error' && <p className="notice">No se pudo cargar el plan ({state.error}).</p>}
       {state.status === 'ok' && !state.data && (
@@ -65,9 +60,14 @@ function PlanView({ plan }: { plan: Plan }) {
         )}
       </header>
 
-      <button type="button" className="button button-secondary" onClick={edit}>
-        Editar plan
-      </button>
+      <div className="plan-actions">
+        <button type="button" className="button button-secondary" onClick={edit}>
+          Editar plan
+        </button>
+        <Link to="/plan/nuevo" className="button button-secondary">
+          Nuevo plan
+        </Link>
+      </div>
 
       {plan.weeks > 1 && (
         <div
@@ -91,48 +91,28 @@ function PlanView({ plan }: { plan: Plan }) {
         </div>
       )}
 
-      <ol className="plan-week">
+      <ol className="card plan-week">
         {WEEKDAYS.map((name, weekday) => {
           const days = plan.days.filter((d) => d.week === week && d.weekday === weekday)
           const isToday = week === plan.current_week && weekday === today
           return (
-            <li key={name} className={`card plan-weekday${isToday ? ' plan-today' : ''}`}>
-              <p className="plan-weekday-name">
-                {name}
-                {isToday && <span className="chip">Hoy</span>}
-              </p>
-              {days.length === 0 ? <p className="muted">Descanso</p> : days.map((day, i) => <DayView key={i} day={day} />)}
+            <li key={name} className={`plan-weekday${days.length === 0 ? ' rest' : ''}${isToday ? ' today' : ''}`}>
+              <span className="plan-weekday-name" aria-label={isToday ? `${name}, hoy` : name}>
+                {name.slice(0, 3)}
+              </span>
+              {days.length === 0 ? (
+                <span className="muted small">Descanso</span>
+              ) : (
+                <div className="plan-workouts">
+                  {days.map((day, i) => (
+                    <PlanWorkout key={i} workout={day} />
+                  ))}
+                </div>
+              )}
             </li>
           )
         })}
       </ol>
     </>
-  )
-}
-
-function DayView({ day }: { day: PlanDay }) {
-  const summary = <span className="plan-day-title">{describeDay(day)}</span>
-  if (!day.exercises.length && !day.note) return <p>{summary}</p>
-
-  return (
-    <details className="plan-day">
-      <summary>{summary}</summary>
-      {day.exercises.length > 0 && (
-        <ul className="plan-exercises">
-          {day.exercises.map((e, i) => (
-            <li key={i}>
-              {e.catalog_id ? <Link to={`/ejercicio/${e.catalog_id}`}>{e.name}</Link> : e.name}
-              {(e.sets || e.reps) && (
-                <span className="muted">
-                  {' '}
-                  · {[e.sets && `${e.sets} series`, e.reps && `${e.reps} reps`].filter(Boolean).join(' × ')}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {day.note && <p className="muted small">{day.note}</p>}
-    </details>
   )
 }

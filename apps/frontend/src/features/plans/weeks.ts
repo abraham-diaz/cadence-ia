@@ -8,5 +8,4 @@ export const weekLetter = (week: number) => String.fromCharCode(65 + week)
 /** Monday = 0, like the backend. */
 export const todayWeekday = () => (new Date().getDay() + 6) % 7
 
-/** "Tren superior · 35 min" */
-export const describeDay = (day: PlanDay) => `${day.workout_type?.name ?? 'Sin tipo'} · ${day.minutes} min`
+export const workoutName = (day: PlanDay) => day.workout_type?.name ?? 'Sin tipo'

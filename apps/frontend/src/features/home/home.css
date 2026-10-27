@@ -24,7 +24,8 @@ a.today-card:active {
   color: var(--text-secondary);
 }
 
-.today-title {
+.today-title,
+.today-card .workout-title {
   display: block;
   font-size: 1.35rem;
   font-weight: 700;
@@ -40,18 +41,6 @@ a.today-card:active {
   flex-direction: column;
   gap: 10px;
   margin-top: 6px;
-}
-
-.today-workout {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-left: 12px;
-}
-
-.today-workout > span:first-child {
-  display: flex;
-  flex-direction: column;
 }
 
 .done-badge {

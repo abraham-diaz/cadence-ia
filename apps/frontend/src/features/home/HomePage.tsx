@@ -3,8 +3,6 @@ import { Link } from 'react-router'
 import { fetchWeekProgress } from '../../api/plans.ts'
 import { fetchSessions } from '../../api/sessions.ts'
 import type { SessionSummary } from '../../api/types.ts'
-import ExerciseSuggestions from '../exercises/ExerciseSuggestions.tsx'
-import TodayExercises from '../exercises/TodayExercises.tsx'
 import { formatDay, localIsoDate, mondayOf, todayIso } from '../../shared/format.ts'
 import { useFetch } from '../../shared/useFetch.ts'
 import './home.css'
@@ -57,8 +55,6 @@ export default function HomePage() {
       {progress.state.status === 'ok' && (
         <>
           <TodayCard progress={progress.state.data} today={today} />
-          <TodayExercises progress={progress.state.data} today={today} />
-          <ExerciseSuggestions progress={progress.state.data} today={today} />
           <WeekCarousel
             current={progress.state.data}
             firstWeek={oldest ? localIsoDate(mondayOf(new Date(oldest.start_time))) : progress.state.data.start}

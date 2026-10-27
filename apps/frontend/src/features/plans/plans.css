@@ -254,48 +254,55 @@
 }
 
 /* Current plan */
-.plan-week {
-  display: flex;
-  flex-direction: column;
+.plan-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.plan-week {
+  padding: 4px 14px;
 }
 
 .plan-weekday {
-  padding: 12px 14px;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
 }
 
-.plan-today {
-  border-color: var(--accent);
+.plan-weekday + .plan-weekday {
+  border-top: 1px solid var(--border);
+}
+
+.plan-weekday.rest {
+  align-items: center;
+  padding: 8px 0;
 }
 
 .plan-weekday-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  flex: none;
+  width: 36px;
+  padding-top: 2px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-muted);
 }
 
-.plan-day-title {
-  font-weight: 600;
+.plan-weekday.rest .plan-weekday-name {
+  padding-top: 0;
 }
 
-.plan-day summary {
-  cursor: pointer;
-  padding: 4px 0;
+.plan-weekday.today .plan-weekday-name {
+  color: var(--accent);
 }
 
-.plan-exercises {
+.plan-workouts {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 6px 0;
-  padding-left: 14px;
-  list-style: disc;
+  gap: 10px;
 }

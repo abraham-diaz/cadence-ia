@@ -1,16 +1,5 @@
-.exercises-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-}
-
 .exercises-hint {
-  gap: 4px;
-}
-
-a.exercises-hint:active {
-  background: var(--surface-pressed);
+  text-decoration: underline;
 }
 
 .exercise-group h3 {

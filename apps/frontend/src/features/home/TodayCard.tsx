@@ -1,7 +1,8 @@
 import { Link } from 'react-router'
-import type { PlannedWorkout, WeekProgress } from '../../api/types.ts'
+import type { WeekProgress } from '../../api/types.ts'
 import { loadChat } from '../plans/chatStorage.ts'
-import { WEEKDAYS } from '../plans/weeks.ts'
+import PlanWorkout from '../plans/PlanWorkout.tsx'
+import { WEEKDAYS, workoutName } from '../plans/weeks.ts'
 
 /** What the plan asks for today, or a way to make a plan. */
 export default function TodayCard({ progress, today: date }: { progress: WeekProgress; today: string }) {
@@ -41,31 +42,18 @@ export default function TodayCard({ progress, today: date }: { progress: WeekPro
 
   const allDone = planned.every((p) => p.done)
   return (
-    <Link to="/plan" className="card today-card">
+    <section className="card today-card">
       <div className="today-head">
         <p className="today-kicker">Hoy toca</p>
         {allDone && <span className="done-badge">✓ Hecho</span>}
       </div>
       <ul className="today-workouts">
         {planned.map((workout, i) => (
-          <li key={i} className={`today-workout stripe-${workout.workout_type?.category ?? 'none'}`}>
-            <span>
-              <span className="today-title">{workoutName(workout)}</span>
-              <span className="muted small">{describe(workout)}</span>
-            </span>
-            {workout.done && !allDone && <span className="done-badge">✓</span>}
+          <li key={i}>
+            <PlanWorkout workout={workout} suggestOn={date} done={workout.done && !allDone} />
           </li>
         ))}
       </ul>
-    </Link>
+    </section>
   )
-}
-
-const workoutName = (workout: PlannedWorkout) => workout.workout_type?.name ?? 'Sin tipo'
-
-function describe(workout: PlannedWorkout): string {
-  const parts = [`${workout.minutes} min`]
-  const count = workout.exercises.length
-  if (count) parts.push(count === 1 ? '1 ejercicio' : `${count} ejercicios`)
-  return parts.join(' · ')
 }

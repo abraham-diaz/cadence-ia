@@ -23,7 +23,11 @@ export function useFetch<T>(load: () => Promise<T>, key: string) {
     load()
       .then((data) => {
         cache.set(key, data)
-        if (!cancelled) setState({ status: 'ok', data })
+        if (cancelled) return
+        // Tab pages refetch on every visit: an unchanged answer shouldn't redraw them.
+        setState((prev) =>
+          prev.status === 'ok' && JSON.stringify(prev.data) === JSON.stringify(data) ? prev : { status: 'ok', data },
+        )
       })
       .catch((err: Error) => {
         // A failed refresh (e.g. no signal) keeps showing the data we already have.

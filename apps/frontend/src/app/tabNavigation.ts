@@ -4,16 +4,6 @@ import { useLocation, useNavigate } from 'react-router'
 export const TAB_PATHS = ['/', '/plan', '/tipos']
 
 const MIN_DISTANCE = 60
-// Longer than the slide in tab-bar.css, so the direction holds until it ends.
-const TRANSITION_MS = 400
-
-/** Tells the CSS which way the next page should slide in. */
-export function setTabDirection(from: string, to: string) {
-  if (from === to) return
-  const root = document.documentElement
-  root.dataset.tabDir = TAB_PATHS.indexOf(to) > TAB_PATHS.indexOf(from) ? 'forward' : 'back'
-  window.setTimeout(() => delete root.dataset.tabDir, TRANSITION_MS)
-}
 
 /** Swiping left or right moves to the next or previous tab. */
 export function useTabSwipe() {
@@ -36,10 +26,11 @@ export function useTabSwipe() {
       start = null
       if (Math.abs(dx) < MIN_DISTANCE || Math.abs(dx) < 2 * Math.abs(dy)) return
 
-      const to = TAB_PATHS[TAB_PATHS.indexOf(pathname) + (dx < 0 ? 1 : -1)]
+      const current = TAB_PATHS.indexOf(pathname)
+      if (current === -1) return // a detail page: the swipe is iOS's "back"
+      const to = TAB_PATHS[current + (dx < 0 ? 1 : -1)]
       if (!to) return
-      setTabDirection(pathname, to)
-      navigate(to, { viewTransition: true })
+      navigate(to)
     }
 
     function onCancel() {

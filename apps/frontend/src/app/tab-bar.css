@@ -1,3 +1,8 @@
+/* The slide-in starts off to the side: no sideways scroll while it does. */
+.with-tabs {
+  overflow-x: clip;
+}
+
 .with-tabs .page {
   padding-bottom: calc(env(safe-area-inset-bottom) + 92px);
 }
@@ -48,52 +53,23 @@
   }
 }
 
-/* Switching tabs: the page cross-fades and the bubble stays put. */
-.tab-bar {
-  view-transition-name: tab-bar;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.18s;
-  animation-timing-function: ease-out;
-}
-
-/* Moving between tabs, the page slides in from the side it's on. */
+/* Switching tabs: the page coming in slides from the side it's on. A plain animation, not a
+   View Transition, whose overlay swallowed any tap until it ended. */
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-tab-dir]::view-transition-old(root),
-  :root[data-tab-dir]::view-transition-new(root) {
-    animation-duration: 0.26s;
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  .tab-page[data-enter] {
+    animation: 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  :root[data-tab-dir='forward']::view-transition-old(root) {
-    animation-name: slide-out-left;
-  }
-  :root[data-tab-dir='forward']::view-transition-new(root) {
+  .tab-page[data-enter='forward'] {
     animation-name: slide-in-right;
   }
-  :root[data-tab-dir='back']::view-transition-old(root) {
-    animation-name: slide-out-right;
-  }
-  :root[data-tab-dir='back']::view-transition-new(root) {
+
+  .tab-page[data-enter='back'] {
     animation-name: slide-in-left;
   }
 
-  @keyframes slide-out-left {
-    to {
-      transform: translateX(-30%);
-      opacity: 0;
-    }
-  }
   @keyframes slide-in-right {
     from {
-      transform: translateX(30%);
-      opacity: 0;
-    }
-  }
-  @keyframes slide-out-right {
-    to {
       transform: translateX(30%);
       opacity: 0;
     }
@@ -103,13 +79,5 @@
       transform: translateX(-30%);
       opacity: 0;
     }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none;
   }
 }

@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter
 
 from cadence_ia.api.deps import CoachDep, Database, PlanExtractorDep
-from cadence_ia.api.schemas.common import ErrorOut
+from cadence_ia.api.errors import error_responses
 from cadence_ia.api.schemas.plans import (
     ConversationIn,
     PlanChatIn,
@@ -22,10 +22,7 @@ from cadence_ia.services import plans
 
 router = APIRouter(prefix="/api/plans", tags=["plans"])
 
-UNAVAILABLE = {503: {"model": ErrorOut}}
-
-
-@router.post("/chat", responses=UNAVAILABLE)
+@router.post("/chat", responses=error_responses(503))
 def chat(body: PlanChatIn, conn: Database, coach: CoachDep) -> PlanChatOut:
     """Send the whole conversation and get the coach's next reply."""
     return PlanChatOut(reply=plans.chat(conn, chat_messages(body), coach))
@@ -37,13 +34,13 @@ def week_summary(conn: Database) -> WeekSummaryOut:
     return WeekSummaryOut(text=plans.last_week(conn))
 
 
-@router.post("/proposal", responses={**UNAVAILABLE, 409: {"model": ErrorOut}})
+@router.post("/proposal", responses=error_responses(409, 503))
 def propose(body: ConversationIn, conn: Database, extractor: PlanExtractorDep) -> PlanProposalOut:
     """Read the plan agreed in the chat, for the user to review. Nothing is saved."""
     return PlanProposalOut.model_validate(plans.propose(conn, chat_messages(body), extractor))
 
 
-@router.post("", status_code=201, responses={422: {"model": ErrorOut}})
+@router.post("", status_code=201, responses=error_responses(422))
 def save_plan(body: PlanIn, conn: Database) -> PlanOut:
     """Save the reviewed plan as the current one, creating its new workout types."""
     days = day_inputs(body)

@@ -2,15 +2,18 @@ import json
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING
 
 from cadence_ia.llm.assessor import SYSTEM_PROMPT, AssessmentContent
 from cadence_ia.llm.coach import COACH_PROMPT, ChatMessage
 from cadence_ia.llm.errors import LLMUnavailable
 from cadence_ia.llm.planner import EXTRACT_PROMPT, PlanDraft, transcript
 
+if TYPE_CHECKING:  # only for the type checker: the SDK is loaded on first use
+    from google import genai
 
-def gemini_client(api_key: str | None):
+
+def gemini_client(api_key: str | None) -> "genai.Client | None":
     """One client for the whole app; None without a key, so the app still starts."""
     if not api_key:
         return None
@@ -20,7 +23,7 @@ def gemini_client(api_key: str | None):
     return genai.Client(api_key=api_key)
 
 
-def _require(client):
+def _require(client: "genai.Client | None") -> "genai.Client":
     if client is None:
         raise LLMUnavailable("Falta la variable GEMINI_API_KEY en el servidor")
     return client
@@ -42,7 +45,7 @@ def _gemini_errors() -> Iterator[None]:
 
 @dataclass(frozen=True)
 class GeminiAssessor:
-    client: Any
+    client: "genai.Client | None"
     model: str
 
     def __call__(self, payload: dict) -> AssessmentContent:
@@ -68,7 +71,7 @@ class GeminiAssessor:
 
 @dataclass(frozen=True)
 class GeminiCoach:
-    client: Any
+    client: "genai.Client | None"
     model: str
 
     def __call__(self, context: dict, messages: list[ChatMessage]) -> str:
@@ -94,7 +97,7 @@ class GeminiCoach:
 
 @dataclass(frozen=True)
 class GeminiPlanExtractor:
-    client: Any
+    client: "genai.Client | None"
     model: str
 
     def __call__(self, type_names: list[str], messages: list[ChatMessage]) -> PlanDraft:

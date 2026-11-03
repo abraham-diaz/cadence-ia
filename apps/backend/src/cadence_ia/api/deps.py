@@ -1,6 +1,6 @@
 import sqlite3
 from collections.abc import Iterator
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import Depends, Request
 
@@ -10,6 +10,9 @@ from cadence_ia.llm.coach import Coach
 from cadence_ia.llm.gemini import GeminiAssessor, GeminiCoach, GeminiPlanExtractor
 from cadence_ia.llm.planner import PlanExtractor
 from cadence_ia.storage.database import connect
+
+if TYPE_CHECKING:
+    from google import genai
 
 
 def get_settings(request: Request) -> Settings:
@@ -30,11 +33,11 @@ def get_db(settings: AppSettings) -> Iterator[sqlite3.Connection]:
 Database = Annotated[sqlite3.Connection, Depends(get_db)]
 
 
-def get_gemini(request: Request) -> Any:
+def get_gemini(request: Request) -> "genai.Client | None":
     return request.app.state.gemini
 
 
-GeminiClient = Annotated[Any, Depends(get_gemini)]
+GeminiClient = Annotated["genai.Client | None", Depends(get_gemini)]
 
 
 # The three LLM dependencies are replaced by fakes in the tests.

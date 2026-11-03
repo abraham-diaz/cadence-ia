@@ -11,7 +11,7 @@ from cadence_ia.llm.coach import ChatMessage, build_context
 from cadence_ia.llm.errors import LLMUnavailable
 from cadence_ia.llm.gemini import GeminiCoach
 from cadence_ia.main import create_app
-from cadence_ia.services import plans
+from cadence_ia.services import plan_chat
 from cadence_ia.services.errors import Unavailable
 from cadence_ia.services.ingest import ingest
 from cadence_ia.storage import sessions, workout_types
@@ -105,7 +105,7 @@ def test_coach_unavailable_is_503(client, coach):
 
 
 def test_context_is_only_today_and_type_names(conn, coach):
-    plans.chat(conn, [ChatMessage("user", "Hola")], coach, today=date(2026, 10, 5))
+    plan_chat.chat(conn, [ChatMessage("user", "Hola")], coach, today=date(2026, 10, 5))
     context, _ = coach.calls[0]
     assert context == {
         "today": {"date": "2026-10-05", "weekday": "lunes"},
@@ -118,7 +118,7 @@ def test_context_without_types():
 
 
 def test_last_week_summary(conn):
-    text = plans.last_week(conn, today=date(2026, 10, 5))
+    text = plan_chat.last_week(conn, today=date(2026, 10, 5))
     assert text.startswith("Mis últimos entrenos de la semana (29 sep - 5 oct):")
     assert "- Pierna: 1 sesión" in text
     assert "(sábado)" in text
@@ -137,7 +137,7 @@ def test_week_summary_endpoint(client):
 def test_service_turns_llm_errors_into_unavailable(conn, coach):
     coach.error = "No se pudo contactar con Gemini"
     with pytest.raises(Unavailable) as err:
-        plans.chat(conn, [ChatMessage("user", "Hola")], coach)
+        plan_chat.chat(conn, [ChatMessage("user", "Hola")], coach)
     assert err.value.code == "coach_unavailable"
 
 

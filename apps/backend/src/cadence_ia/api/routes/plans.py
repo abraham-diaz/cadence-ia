@@ -18,26 +18,26 @@ from cadence_ia.api.schemas.plans import (
     plan_out,
     week_progress_out,
 )
-from cadence_ia.services import plans
+from cadence_ia.services import plan_chat, plans
 
 router = APIRouter(prefix="/api/plans", tags=["plans"])
 
 @router.post("/chat", responses=error_responses(503))
 def chat(body: PlanChatIn, conn: Database, coach: CoachDep) -> PlanChatOut:
     """Send the whole conversation and get the coach's next reply."""
-    return PlanChatOut(reply=plans.chat(conn, chat_messages(body), coach))
+    return PlanChatOut(reply=plan_chat.chat(conn, chat_messages(body), coach))
 
 
 @router.get("/week-summary")
 def week_summary(conn: Database) -> WeekSummaryOut:
     """The last 7 days written as a chat message. The user decides whether to send it."""
-    return WeekSummaryOut(text=plans.last_week(conn))
+    return WeekSummaryOut(text=plan_chat.last_week(conn))
 
 
 @router.post("/proposal", responses=error_responses(409, 503))
 def propose(body: ConversationIn, conn: Database, extractor: PlanExtractorDep) -> PlanProposalOut:
     """Read the plan agreed in the chat, for the user to review. Nothing is saved."""
-    return PlanProposalOut.model_validate(plans.propose(conn, chat_messages(body), extractor))
+    return PlanProposalOut.model_validate(plan_chat.propose(conn, chat_messages(body), extractor))
 
 
 @router.post("", status_code=201, responses=error_responses(422))

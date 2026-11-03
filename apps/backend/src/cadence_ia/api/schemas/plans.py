@@ -6,9 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from cadence_ia.api.schemas.common import WorkoutTypeRef
 from cadence_ia.api.schemas.workout_types import WorkoutTypeIn
-from cadence_ia.domain.plan import PlanDay
+from cadence_ia.domain.plan import Exercise, PlanDay
 from cadence_ia.domain.week_progress import DayStatus, WeekProgress
 from cadence_ia.domain.workout_type import Category
+from cadence_ia.llm.coach import ChatMessage
 from cadence_ia.services import plans
 
 
@@ -137,6 +138,32 @@ class WeekProgressOut(BaseModel):
     planned_minutes: int
     done_minutes: int  # every session of the week counts, planned or not
     days: list[DayProgressOut]
+
+
+def chat_messages(body: ConversationIn) -> list[ChatMessage]:
+    return [ChatMessage(role=m.role, text=m.text) for m in body.messages]
+
+
+def day_inputs(body: PlanIn) -> list[plans.DayInput]:
+    return [
+        plans.DayInput(
+            week=day.week,
+            weekday=day.weekday,
+            workout_type=(
+                day.workout_type_id
+                if day.workout_type_id is not None
+                else plans.NewType(
+                    day.new_type.name, day.new_type.category, tuple(day.new_type.muscles)
+                )
+            ),
+            minutes=day.minutes,
+            note=day.note or None,
+            exercises=tuple(
+                Exercise(e.name, e.sets, e.reps or None, e.catalog_id) for e in day.exercises
+            ),
+        )
+        for day in body.days
+    ]
 
 
 def proposal_out(proposal: plans.Proposal) -> PlanProposalOut:

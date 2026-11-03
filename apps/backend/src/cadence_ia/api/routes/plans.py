@@ -13,12 +13,12 @@ from cadence_ia.api.schemas.plans import (
     PlanProposalOut,
     WeekProgressOut,
     WeekSummaryOut,
+    chat_messages,
+    day_inputs,
     plan_out,
     proposal_out,
     week_progress_out,
 )
-from cadence_ia.domain.plan import Exercise
-from cadence_ia.llm.coach import ChatMessage
 from cadence_ia.services import plans
 
 router = APIRouter(prefix="/api/plans", tags=["plans"])
@@ -26,14 +26,10 @@ router = APIRouter(prefix="/api/plans", tags=["plans"])
 UNAVAILABLE = {503: {"model": ErrorOut}}
 
 
-def _messages(body: ConversationIn) -> list[ChatMessage]:
-    return [ChatMessage(role=m.role, text=m.text) for m in body.messages]
-
-
 @router.post("/chat", responses=UNAVAILABLE)
 def chat(body: PlanChatIn, conn: Database, coach: CoachDep) -> PlanChatOut:
     """Send the whole conversation and get the coach's next reply."""
-    return PlanChatOut(reply=plans.chat(conn, _messages(body), coach))
+    return PlanChatOut(reply=plans.chat(conn, chat_messages(body), coach))
 
 
 @router.get("/week-summary")
@@ -45,31 +41,13 @@ def week_summary(conn: Database) -> WeekSummaryOut:
 @router.post("/proposal", responses={**UNAVAILABLE, 409: {"model": ErrorOut}})
 def propose(body: ConversationIn, conn: Database, extractor: PlanExtractorDep) -> PlanProposalOut:
     """Read the plan agreed in the chat, for the user to review. Nothing is saved."""
-    return proposal_out(plans.propose(conn, _messages(body), extractor))
+    return proposal_out(plans.propose(conn, chat_messages(body), extractor))
 
 
 @router.post("", status_code=201, responses={422: {"model": ErrorOut}})
 def save_plan(body: PlanIn, conn: Database) -> PlanOut:
     """Save the reviewed plan as the current one, creating its new workout types."""
-    days = [
-        plans.DayInput(
-            week=day.week,
-            weekday=day.weekday,
-            workout_type=(
-                day.workout_type_id
-                if day.workout_type_id is not None
-                else plans.NewType(
-                    day.new_type.name, day.new_type.category, tuple(day.new_type.muscles)
-                )
-            ),
-            minutes=day.minutes,
-            note=day.note or None,
-            exercises=tuple(
-                Exercise(e.name, e.sets, e.reps or None, e.catalog_id) for e in day.exercises
-            ),
-        )
-        for day in body.days
-    ]
+    days = day_inputs(body)
     return plan_out(plans.save(conn, body.title, body.weeks, body.current_week, days))
 
 

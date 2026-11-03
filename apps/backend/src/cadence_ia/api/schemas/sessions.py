@@ -7,7 +7,6 @@ from pydantic import BaseModel
 from cadence_ia.api.schemas.common import WorkoutTypeRef
 from cadence_ia.domain.assessment import Assessment
 from cadence_ia.domain.session import Session
-from cadence_ia.llm.assessor import AssessmentContent
 from cadence_ia.services import sessions
 
 
@@ -67,7 +66,12 @@ class Comparison(SessionStats):
     sessions: int  # how many previous sessions the averages come from
 
 
-class AssessmentOut(AssessmentContent):
+class AssessmentOut(BaseModel):
+    headline: str
+    summary: str
+    strengths: list[str]
+    improvements: list[str]
+    advice: str
     model: str
     created_at: datetime
 

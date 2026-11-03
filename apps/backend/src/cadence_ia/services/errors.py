@@ -28,7 +28,7 @@ class NotFound(ServiceError):
 
 
 class InvalidInput(ServiceError):
-    """The request refers to something that doesn't exist."""
+    """The request is well-formed but its data isn't valid (e.g. an unknown type)."""
 
 
 class Conflict(ServiceError):

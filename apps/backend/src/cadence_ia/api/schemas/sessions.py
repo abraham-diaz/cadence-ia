@@ -4,9 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from cadence_ia.api.schemas.common import WorkoutTypeRef
+from cadence_ia.api.schemas.common import OutModel, WorkoutTypeRef
 from cadence_ia.domain.assessment import Assessment
-from cadence_ia.domain.session import Session
 from cadence_ia.services import sessions
 
 
@@ -14,7 +13,7 @@ class SessionTypeIn(BaseModel):
     workout_type_id: int | None  # None clears the type
 
 
-class SegmentOut(BaseModel):
+class SegmentOut(OutModel):
     kind: Literal["work", "rest"]
     start_s: int
     end_s: int
@@ -26,12 +25,12 @@ class SegmentOut(BaseModel):
     drop_60s: int | None
 
 
-class HeartRatePoint(BaseModel):
+class HeartRatePoint(OutModel):
     t: float  # seconds since the first trackpoint
     hr: int
 
 
-class SessionSummary(BaseModel):
+class SessionSummary(OutModel):
     id: str
     start_time: datetime
     sport: str
@@ -46,7 +45,7 @@ class SessionSummary(BaseModel):
     rests: int | None
 
 
-class SessionStats(BaseModel):
+class SessionStats(OutModel):
     duration_s: float | None
     hr_avg: float | None
     hr_max: float | None
@@ -66,7 +65,7 @@ class Comparison(SessionStats):
     sessions: int  # how many previous sessions the averages come from
 
 
-class AssessmentOut(BaseModel):
+class AssessmentOut(OutModel):
     headline: str
     summary: str
     strengths: list[str]
@@ -89,23 +88,6 @@ class SessionDetail(SessionSummary):
     assessment: AssessmentOut | None
 
 
-def session_summary(session: Session) -> SessionSummary:
-    workout_type = session.workout_type
-    return SessionSummary(
-        id=session.id,
-        start_time=session.start_time,
-        sport=session.sport,
-        duration_s=session.duration_s,
-        calories=session.calories,
-        hr_min=session.hr_min,
-        hr_avg=session.hr_avg,
-        hr_max=session.hr_max,
-        workout_type=WorkoutTypeRef(**asdict(workout_type)) if workout_type else None,
-        sets=session.sets,
-        rests=session.rests,
-    )
-
-
 def assessment_out(assessment: Assessment) -> AssessmentOut:
     return AssessmentOut(
         **assessment.content, model=assessment.model, created_at=assessment.created_at
@@ -113,14 +95,12 @@ def assessment_out(assessment: Assessment) -> AssessmentOut:
 
 
 def session_detail(detail: sessions.SessionDetail) -> SessionDetail:
-    session, comparison = detail.session, detail.comparison
+    comparison = detail.comparison
     return SessionDetail(
-        **session_summary(session).model_dump(),
-        device=session.device,
-        threshold_bpm=session.threshold_bpm,
-        segments=[SegmentOut(**asdict(s), duration_s=s.duration_s) for s in detail.segments],
+        **asdict(detail.session),
+        segments=detail.segments,
         heart_rate=[HeartRatePoint(t=t, hr=hr) for t, hr in detail.heart_rate],
-        stats=SessionStats(**asdict(detail.stats)),
+        stats=detail.stats,
         comparison=(
             Comparison(sessions=comparison.sessions, **asdict(comparison.stats))
             if comparison

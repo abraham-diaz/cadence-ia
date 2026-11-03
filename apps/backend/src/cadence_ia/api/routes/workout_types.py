@@ -8,7 +8,6 @@ from cadence_ia.api.schemas.workout_types import (
     MuscleSuggestionOut,
     WorkoutTypeIn,
     WorkoutTypeOut,
-    muscle_suggestion_out,
     workout_type_out,
 )
 from cadence_ia.services import exercises, workout_types
@@ -50,4 +49,4 @@ def suggest_exercises(
 ) -> list[MuscleSuggestionOut]:
     """A few catalog exercises per muscle of the type; `day` (default today) picks which."""
     suggestions = exercises.suggestions_for_type(conn, type_id, day or date.today())
-    return [muscle_suggestion_out(s) for s in suggestions]
+    return [MuscleSuggestionOut.model_validate(s) for s in suggestions]

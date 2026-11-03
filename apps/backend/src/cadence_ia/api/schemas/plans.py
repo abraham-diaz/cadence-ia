@@ -4,9 +4,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from cadence_ia.api.schemas.common import WorkoutTypeRef
+from cadence_ia.api.schemas.common import OutModel, WorkoutTypeRef
 from cadence_ia.api.schemas.workout_types import WorkoutTypeIn
-from cadence_ia.domain.plan import Exercise, PlanDay
+from cadence_ia.domain.plan import Exercise
 from cadence_ia.domain.week_progress import DayStatus, WeekProgress
 from cadence_ia.domain.workout_type import Category
 from cadence_ia.llm.coach import ChatMessage
@@ -31,15 +31,15 @@ class PlanChatIn(ConversationIn):
         return messages
 
 
-class PlanChatOut(BaseModel):
+class PlanChatOut(OutModel):
     reply: str
 
 
-class WeekSummaryOut(BaseModel):
+class WeekSummaryOut(OutModel):
     text: str
 
 
-class ExerciseOut(BaseModel):
+class ExerciseOut(OutModel):
     name: str
     sets: int | None
     reps: str | None  # text: "10-12", "30 s"...
@@ -56,7 +56,7 @@ class ExerciseIn(BaseModel):
     catalog_id: int | None = None
 
 
-class ProposedDayOut(BaseModel):
+class ProposedDayOut(OutModel):
     week: int
     weekday: int  # 0 = Monday
     type_name: str
@@ -67,7 +67,7 @@ class ProposedDayOut(BaseModel):
     exercises: list[ExerciseOut]
 
 
-class PlanProposalOut(BaseModel):
+class PlanProposalOut(OutModel):
     title: str
     weeks: int
     days: list[ProposedDayOut]
@@ -98,7 +98,7 @@ class PlanIn(BaseModel):
     days: list[PlanDayIn] = Field(min_length=1, max_length=60)
 
 
-class PlanDayOut(BaseModel):
+class PlanDayOut(OutModel):
     week: int
     weekday: int
     workout_type: WorkoutTypeRef | None  # None if the type was deleted afterwards
@@ -107,7 +107,7 @@ class PlanDayOut(BaseModel):
     exercises: list[ExerciseOut]
 
 
-class PlanOut(BaseModel):
+class PlanOut(OutModel):
     id: int
     title: str
     weeks: int
@@ -121,14 +121,14 @@ class PlannedWorkoutOut(PlanDayOut):
     done: bool
 
 
-class DayProgressOut(BaseModel):
+class DayProgressOut(OutModel):
     date: date
     status: DayStatus
     planned: list[PlannedWorkoutOut]
     session_ids: list[str]
 
 
-class WeekProgressOut(BaseModel):
+class WeekProgressOut(OutModel):
     start: date  # Monday
     plan_title: str | None
     plan_week: int | None
@@ -166,31 +166,8 @@ def day_inputs(body: PlanIn) -> list[plans.DayInput]:
     ]
 
 
-def proposal_out(proposal: plans.Proposal) -> PlanProposalOut:
-    return PlanProposalOut(
-        title=proposal.title,
-        weeks=proposal.weeks,
-        days=[
-            ProposedDayOut(
-                **{k: v for k, v in asdict(day).items() if k != "exercises"},
-                exercises=[ExerciseOut(**asdict(e)) for e in day.exercises],
-            )
-            for day in proposal.days
-        ],
-    )
-
-
 def plan_out(current: plans.CurrentPlan) -> PlanOut:
-    plan = current.plan
-    return PlanOut(
-        id=plan.id,
-        title=plan.title,
-        weeks=plan.weeks,
-        cycle_start=plan.cycle_start,
-        created_at=plan.created_at,
-        current_week=current.week,
-        days=[PlanDayOut(**_plan_day_fields(day)) for day in plan.days],
-    )
+    return PlanOut(**asdict(current.plan), current_week=current.week)
 
 
 def week_progress_out(progress: WeekProgress) -> WeekProgressOut:
@@ -208,22 +185,9 @@ def week_progress_out(progress: WeekProgress) -> WeekProgressOut:
             DayProgressOut(
                 date=day.date,
                 status=day.status,
-                planned=[
-                    PlannedWorkoutOut(**_plan_day_fields(p.day), done=p.done) for p in day.planned
-                ],
+                planned=[PlannedWorkoutOut(**asdict(p.day), done=p.done) for p in day.planned],
                 session_ids=[s.id for s in day.sessions],
             )
             for day in progress.days
         ],
     )
-
-
-def _plan_day_fields(day: PlanDay) -> dict:
-    return {
-        "week": day.week,
-        "weekday": day.weekday,
-        "workout_type": WorkoutTypeRef(**asdict(day.workout_type)) if day.workout_type else None,
-        "minutes": day.minutes,
-        "note": day.note,
-        "exercises": [ExerciseOut(**asdict(e)) for e in day.exercises],
-    }

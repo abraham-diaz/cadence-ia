@@ -9,7 +9,6 @@ from cadence_ia.api.schemas.sessions import (
     SessionTypeIn,
     assessment_out,
     session_detail,
-    session_summary,
 )
 from cadence_ia.services import assessments, sessions
 
@@ -20,7 +19,7 @@ NOT_FOUND = {404: {"model": ErrorOut}}
 
 @router.get("")
 def list_sessions(conn: Database) -> list[SessionSummary]:
-    return [session_summary(session) for session in sessions.list_sessions(conn)]
+    return [SessionSummary.model_validate(session) for session in sessions.list_sessions(conn)]
 
 
 @router.get("/{session_id}", responses=NOT_FOUND)

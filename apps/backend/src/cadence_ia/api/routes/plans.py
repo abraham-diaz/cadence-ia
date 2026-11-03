@@ -16,7 +16,6 @@ from cadence_ia.api.schemas.plans import (
     chat_messages,
     day_inputs,
     plan_out,
-    proposal_out,
     week_progress_out,
 )
 from cadence_ia.services import plans
@@ -41,7 +40,7 @@ def week_summary(conn: Database) -> WeekSummaryOut:
 @router.post("/proposal", responses={**UNAVAILABLE, 409: {"model": ErrorOut}})
 def propose(body: ConversationIn, conn: Database, extractor: PlanExtractorDep) -> PlanProposalOut:
     """Read the plan agreed in the chat, for the user to review. Nothing is saved."""
-    return proposal_out(plans.propose(conn, chat_messages(body), extractor))
+    return PlanProposalOut.model_validate(plans.propose(conn, chat_messages(body), extractor))
 
 
 @router.post("", status_code=201, responses={422: {"model": ErrorOut}})

@@ -1,14 +1,22 @@
-from pydantic import BaseModel
+from typing import Any
 
-from cadence_ia.domain.exercise import MUSCLE_NAMES, CatalogExercise, Muscle
+from pydantic import model_validator
+
+from cadence_ia.api.schemas.common import OutModel
+from cadence_ia.domain.exercise import MUSCLE_NAMES, Muscle
 
 
-class MuscleOut(BaseModel):
+class MuscleOut(OutModel):
     id: Muscle
     name: str
 
+    @model_validator(mode="before")
+    @classmethod
+    def from_muscle_id(cls, data: Any) -> Any:
+        return {"id": data, "name": MUSCLE_NAMES[data]} if isinstance(data, str) else data
 
-class CatalogExerciseOut(BaseModel):
+
+class CatalogExerciseOut(OutModel):
     id: int
     name: str
     image_url: str | None
@@ -20,22 +28,3 @@ class ExerciseDetailOut(CatalogExerciseOut):
     description: str | None  # one paragraph per line
     primary_muscles: list[MuscleOut]
     secondary_muscles: list[MuscleOut]
-
-
-def muscle_out(muscle: Muscle) -> MuscleOut:
-    return MuscleOut(id=muscle, name=MUSCLE_NAMES[muscle])
-
-
-def catalog_exercise_out(e: CatalogExercise) -> CatalogExerciseOut:
-    return CatalogExerciseOut(
-        id=e.id, name=e.name, image_url=e.image_url, license=e.license, author=e.author
-    )
-
-
-def exercise_detail_out(e: CatalogExercise) -> ExerciseDetailOut:
-    return ExerciseDetailOut(
-        **catalog_exercise_out(e).model_dump(),
-        description=e.description,
-        primary_muscles=[muscle_out(m) for m in e.primary_muscles],
-        secondary_muscles=[muscle_out(m) for m in e.secondary_muscles],
-    )

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Query
 
 from cadence_ia.api.deps import Database
-from cadence_ia.api.schemas import (
+from cadence_ia.api.schemas.common import ErrorOut
+from cadence_ia.api.schemas.exercises import (
     CatalogExerciseOut,
-    ErrorOut,
     ExerciseDetailOut,
     catalog_exercise_out,
     exercise_detail_out,

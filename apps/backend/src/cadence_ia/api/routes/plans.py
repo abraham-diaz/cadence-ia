@@ -3,9 +3,9 @@ from datetime import date
 from fastapi import APIRouter
 
 from cadence_ia.api.deps import CoachDep, Database, PlanExtractorDep
-from cadence_ia.api.schemas import (
+from cadence_ia.api.schemas.common import ErrorOut
+from cadence_ia.api.schemas.plans import (
     ConversationIn,
-    ErrorOut,
     PlanChatIn,
     PlanChatOut,
     PlanIn,

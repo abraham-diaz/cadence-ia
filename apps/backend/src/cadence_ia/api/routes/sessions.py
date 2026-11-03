@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
 from cadence_ia.api.deps import AssessorDep, Database
-from cadence_ia.api.schemas import (
+from cadence_ia.api.schemas.common import ErrorOut
+from cadence_ia.api.schemas.sessions import (
     AssessmentOut,
-    ErrorOut,
     SessionDetail,
     SessionSummary,
     SessionTypeIn,

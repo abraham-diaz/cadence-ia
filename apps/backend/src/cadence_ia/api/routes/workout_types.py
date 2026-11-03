@@ -3,8 +3,8 @@ from fastapi import APIRouter, Response
 from cadence_ia.api.deps import Database
 from datetime import date
 
-from cadence_ia.api.schemas import (
-    ErrorOut,
+from cadence_ia.api.schemas.common import ErrorOut
+from cadence_ia.api.schemas.workout_types import (
     MuscleSuggestionOut,
     WorkoutTypeIn,
     WorkoutTypeOut,

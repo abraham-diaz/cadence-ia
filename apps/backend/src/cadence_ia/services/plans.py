@@ -36,8 +36,6 @@ class ProposedDay:
 
 @dataclass(frozen=True)
 class Proposal:
-    """The plan read from the chat, for the user to review before saving."""
-
     title: str
     weeks: int
     days: list[ProposedDay]
@@ -47,7 +45,7 @@ class Proposal:
 class DayInput:
     week: int
     weekday: int
-    workout_type: int | NewType  # an existing type's id, or one to create
+    workout_type: int | NewType
     minutes: int
     note: str | None
     exercises: tuple[Exercise, ...]
@@ -62,8 +60,7 @@ class CurrentPlan:
 def chat(
     conn: sqlite3.Connection, messages: list[ChatMessage], coach: Coach, today: date | None = None
 ) -> str:
-    """The coach's reply to the conversation so far. Nothing is stored:
-    the client keeps the conversation and sends it whole every time."""
+    """Nothing is stored: the client keeps the conversation and sends it whole every time."""
     context = build_context(today or date.today(), workout_types.list_types(conn))
     try:
         return coach(context, messages)

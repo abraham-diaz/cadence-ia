@@ -15,7 +15,7 @@ class SessionDetail:
     segments: list[Segment]
     heart_rate: list[tuple[float, int]]  # (seconds since start, bpm)
     stats: Stats
-    # Average of the previous sessions of the same type; None if there are none.
+    # Average of the previous sessions of the same type.
     comparison: Baseline | None
     # Every session of the same type, oldest first (includes this one).
     history: list[HistoryEntry]

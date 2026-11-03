@@ -2,6 +2,7 @@ import json
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from typing import Any
 
 from cadence_ia.llm.assessor import SYSTEM_PROMPT, AssessmentContent
 from cadence_ia.llm.coach import COACH_PROMPT, ChatMessage
@@ -9,13 +10,20 @@ from cadence_ia.llm.errors import LLMUnavailable
 from cadence_ia.llm.planner import EXTRACT_PROMPT, PlanDraft, transcript
 
 
-def _client(api_key: str | None):
+def gemini_client(api_key: str | None):
+    """One client for the whole app; None without a key, so the app still starts."""
     if not api_key:
-        raise LLMUnavailable("Falta la variable GEMINI_API_KEY en el servidor")
+        return None
     # Imported here so the rest of the app (and the tests) don't need the SDK loaded.
     from google import genai
 
     return genai.Client(api_key=api_key)
+
+
+def _require(client):
+    if client is None:
+        raise LLMUnavailable("Falta la variable GEMINI_API_KEY en el servidor")
+    return client
 
 
 @contextmanager
@@ -34,13 +42,13 @@ def _gemini_errors() -> Iterator[None]:
 
 @dataclass(frozen=True)
 class GeminiAssessor:
-    api_key: str | None
+    client: Any
     model: str
 
     def __call__(self, payload: dict) -> AssessmentContent:
         from google.genai import types
 
-        client = _client(self.api_key)
+        client = _require(self.client)
         with _gemini_errors():
             response = client.models.generate_content(
                 model=self.model,
@@ -60,13 +68,13 @@ class GeminiAssessor:
 
 @dataclass(frozen=True)
 class GeminiCoach:
-    api_key: str | None
+    client: Any
     model: str
 
     def __call__(self, context: dict, messages: list[ChatMessage]) -> str:
         from google.genai import types
 
-        client = _client(self.api_key)
+        client = _require(self.client)
         with _gemini_errors():
             response = client.models.generate_content(
                 model=self.model,
@@ -86,13 +94,13 @@ class GeminiCoach:
 
 @dataclass(frozen=True)
 class GeminiPlanExtractor:
-    api_key: str | None
+    client: Any
     model: str
 
     def __call__(self, type_names: list[str], messages: list[ChatMessage]) -> PlanDraft:
         from google.genai import types
 
-        client = _client(self.api_key)
+        client = _require(self.client)
         types_line = json.dumps(type_names, ensure_ascii=False)
         with _gemini_errors():
             response = client.models.generate_content(

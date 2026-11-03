@@ -6,6 +6,7 @@ from cadence_ia.api import router
 from cadence_ia.api.errors import service_error_handler
 from cadence_ia.config import Settings
 from cadence_ia.frontend import mount_frontend
+from cadence_ia.llm.gemini import gemini_client
 from cadence_ia.services.errors import ServiceError
 
 
@@ -22,6 +23,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     app = FastAPI(title="cadence-ia", version="0.1.0")
     app.state.settings = settings
+    app.state.gemini = gemini_client(settings.gemini_api_key)
     app.middleware("http")(no_cache_for_api)
     app.add_exception_handler(ServiceError, service_error_handler)
     app.include_router(router)

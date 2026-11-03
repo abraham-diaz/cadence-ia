@@ -143,9 +143,11 @@ def test_service_turns_llm_errors_into_unavailable(conn, coach):
 
 def test_missing_api_key():
     with pytest.raises(LLMUnavailable, match="GEMINI_API_KEY"):
-        GeminiCoach(api_key=None, model="test-model")({}, [ChatMessage("user", "Hola")])
+        GeminiCoach(client=None, model="test-model")({}, [ChatMessage("user", "Hola")])
 
 
 def test_coach_model_comes_from_settings(tmp_path):
     app = create_app(Settings(db_path=tmp_path / "x.db", gemini_model="other-model"))
-    assert get_coach(app.state.settings) == GeminiCoach(api_key=None, model="other-model")
+    assert get_coach(app.state.settings, app.state.gemini) == GeminiCoach(
+        client=None, model="other-model"
+    )

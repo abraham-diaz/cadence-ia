@@ -116,13 +116,13 @@ def test_llm_unavailable_is_503(client, assessor):
 
 def test_missing_api_key():
     with pytest.raises(LLMUnavailable, match="GEMINI_API_KEY"):
-        GeminiAssessor(api_key=None, model="test-model")({})
+        GeminiAssessor(client=None, model="test-model")({})
 
 
 def test_gemini_model_comes_from_settings(tmp_path):
     app = create_app(Settings(db_path=tmp_path / "x.db", gemini_model="other-model"))
-    assessor = get_assessor(app.state.settings)
-    assert assessor == GeminiAssessor(api_key=None, model="other-model")
+    assessor = get_assessor(app.state.settings, app.state.gemini)
+    assert assessor == GeminiAssessor(client=None, model="other-model")
 
 
 def test_payload_has_metrics_but_no_identifying_data(client, calls):

@@ -1,13 +1,14 @@
 import { useState } from 'react'
+import { LIMITS } from '../../api/limits.ts'
 import type { WorkoutType } from '../../api/types.ts'
 import ExerciseNameInput from '../exercises/ExerciseNameInput.tsx'
-import { emptyExercise, sameName, type DraftDay, type DraftExercise } from './planDraft.ts'
+import { emptyExercise, sameName, type DraftDay, type DraftExercise, type NewTypeDraft } from './planDraft.ts'
 import { WEEKDAYS } from './weeks.ts'
 
 interface Props {
   day: DraftDay
   types: WorkoutType[]
-  newTypes: { name: string; category: 'strength' | 'cardio' }[]
+  newTypes: NewTypeDraft[]
   onChange: (change: (day: DraftDay) => DraftDay) => void
   onRemove: () => void
 }
@@ -113,7 +114,7 @@ export default function DayEditor({ day, types, newTypes, onChange, onRemove }: 
             className="text-input"
             placeholder="Nombre, p. ej. Tren inferior"
             aria-label="Nombre del tipo nuevo"
-            maxLength={60}
+            maxLength={LIMITS.typeName}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             autoFocus
@@ -160,7 +161,7 @@ export default function DayEditor({ day, types, newTypes, onChange, onRemove }: 
                 <input
                   className="text-input"
                   placeholder="10-12"
-                  maxLength={40}
+                  maxLength={LIMITS.reps}
                   value={exercise.reps}
                   onChange={(e) => updateExercise(exercise.key, { reps: e.target.value })}
                 />
@@ -182,7 +183,7 @@ export default function DayEditor({ day, types, newTypes, onChange, onRemove }: 
         <textarea
           className="text-input"
           rows={2}
-          maxLength={500}
+          maxLength={LIMITS.note}
           value={day.note}
           onChange={(e) => onChange((d) => ({ ...d, note: e.target.value }))}
         />

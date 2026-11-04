@@ -6,6 +6,7 @@ import { useFetch } from '../../shared/useFetch.ts'
 import { fromPlan, loadDraft, saveDraft } from './planDraft.ts'
 import './plans.css'
 import PlanWorkout from './PlanWorkout.tsx'
+import WeekTabs from './WeekTabs.tsx'
 import { todayWeekday, WEEKDAYS, weekLetter } from './weeks.ts'
 
 export default function PlanPage() {
@@ -36,7 +37,6 @@ function PlanView({ plan }: { plan: Plan }) {
   const [week, setWeek] = useState(plan.current_week)
   const navigate = useNavigate()
   const today = todayWeekday()
-  const weeks = Array.from({ length: plan.weeks }, (_, i) => i)
 
   function edit() {
     const pending = loadDraft()
@@ -69,27 +69,7 @@ function PlanView({ plan }: { plan: Plan }) {
         </Link>
       </div>
 
-      {plan.weeks > 1 && (
-        <div
-          className="segmented"
-          role="tablist"
-          aria-label="Semana"
-          style={{ gridTemplateColumns: `repeat(${plan.weeks}, 1fr)` }}
-        >
-          {weeks.map((w) => (
-            <button
-              key={w}
-              type="button"
-              role="tab"
-              aria-selected={week === w}
-              className={week === w ? 'selected' : ''}
-              onClick={() => setWeek(w)}
-            >
-              Semana {weekLetter(w)}
-            </button>
-          ))}
-        </div>
-      )}
+      <WeekTabs weeks={plan.weeks} selected={week} onSelect={setWeek} />
 
       <ol className="card plan-week">
         {WEEKDAYS.map((name, weekday) => {

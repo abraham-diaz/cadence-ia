@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { savePlan } from '../../api/plans.ts'
-import type { Category } from '../../api/types.ts'
+import { LIMITS } from '../../api/limits.ts'
 import { fetchWorkoutTypes } from '../../api/workoutTypes.ts'
 import { useFetch } from '../../shared/useFetch.ts'
-import { CATEGORY_LABELS } from '../workout-types/categories.ts'
+import CategoryPicker from '../workout-types/CategoryPicker.tsx'
 import DayEditor from './DayEditor.tsx'
 import {
   loadDraft,
@@ -17,9 +17,8 @@ import {
   type PlanDraft,
 } from './planDraft.ts'
 import './plans.css'
+import WeekTabs from './WeekTabs.tsx'
 import { weekLetter } from './weeks.ts'
-
-const MAX_WEEKS = 4
 
 export default function PlanReviewPage() {
   const navigate = useNavigate()
@@ -27,7 +26,7 @@ export default function PlanReviewPage() {
   const { state: typesState } = useFetch(fetchWorkoutTypes, 'types')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [viewWeek, setViewWeek] = useState(() => loadDraft()?.currentWeek ?? 0)
+  const [viewWeek, setViewWeek] = useState(() => draft?.currentWeek ?? 0)
 
   useEffect(() => saveDraft(draft), [draft])
 
@@ -115,7 +114,6 @@ export default function PlanReviewPage() {
     }
   }
 
-  const weeks = Array.from({ length: draft.weeks }, (_, i) => i)
   const week = Math.min(viewWeek, draft.weeks - 1)
 
   function addWeek() {
@@ -143,7 +141,7 @@ export default function PlanReviewPage() {
         <span className="field-label">Nombre</span>
         <input
           className="text-input"
-          maxLength={80}
+          maxLength={LIMITS.planTitle}
           value={draft.title}
           onChange={(e) => update((d) => ({ ...d, title: e.target.value }))}
         />
@@ -174,48 +172,19 @@ export default function PlanReviewPage() {
                   </option>
                 ))}
               </select>
-              <div className="segmented" role="radiogroup" aria-label={`Categoría de ${type.name}`}>
-                {(Object.keys(CATEGORY_LABELS) as Category[]).map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    role="radio"
-                    aria-checked={type.category === category}
-                    className={type.category === category ? 'selected' : ''}
-                    onClick={() =>
-                      updateNewType(type.name, (day) => ({ ...day, type: { kind: 'new', name: type.name, category } }))
-                    }
-                  >
-                    {CATEGORY_LABELS[category]}
-                  </button>
-                ))}
-              </div>
+              <CategoryPicker
+                value={type.category}
+                label={`Categoría de ${type.name}`}
+                onChange={(category) =>
+                  updateNewType(type.name, (day) => ({ ...day, type: { kind: 'new', name: type.name, category } }))
+                }
+              />
             </div>
           ))}
         </section>
       )}
 
-      {draft.weeks > 1 && (
-        <div
-          className="segmented"
-          role="tablist"
-          aria-label="Semana"
-          style={{ gridTemplateColumns: `repeat(${draft.weeks}, 1fr)` }}
-        >
-          {weeks.map((w) => (
-            <button
-              key={w}
-              type="button"
-              role="tab"
-              aria-selected={week === w}
-              className={week === w ? 'selected' : ''}
-              onClick={() => setViewWeek(w)}
-            >
-              Semana {weekLetter(w)}
-            </button>
-          ))}
-        </div>
-      )}
+      <WeekTabs weeks={draft.weeks} selected={week} onSelect={setViewWeek} />
 
       <section className="review-week" role={draft.weeks > 1 ? 'tabpanel' : undefined}>
         {draft.weeks > 1 && (
@@ -254,7 +223,7 @@ export default function PlanReviewPage() {
         </button>
       </section>
 
-      {draft.weeks < MAX_WEEKS && (
+      {draft.weeks < LIMITS.planWeeks && (
         <button type="button" className="link-button add-link" onClick={addWeek}>
           + Añadir semana {weekLetter(draft.weeks)}
         </button>

@@ -1,5 +1,5 @@
 import { formatSigned } from './format.ts'
-import './Stat.css'
+import './stat.css'
 
 interface Props {
   label: string

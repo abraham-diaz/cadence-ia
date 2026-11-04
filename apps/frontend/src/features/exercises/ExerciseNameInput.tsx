@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { searchExercises } from '../../api/exercises.ts'
+import { LIMITS } from '../../api/limits.ts'
 import type { CatalogExercise } from '../../api/types.ts'
 import './exercises.css'
 
@@ -40,7 +41,7 @@ export default function ExerciseNameInput({ name, catalogId, onChange }: Props) 
         placeholder="Ejercicio, p. ej. press de banca"
         aria-label="Ejercicio"
         aria-autocomplete="list"
-        maxLength={80}
+        maxLength={LIMITS.exerciseName}
         value={name}
         // Typing over a picked exercise unlinks it: the name may no longer be that one.
         onChange={(e) => onChange(e.target.value, null)}

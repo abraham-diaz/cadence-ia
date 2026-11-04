@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { LIMITS } from '../../api/limits.ts'
 import { fetchWeekSummary, proposePlan, sendPlanChat } from '../../api/plans.ts'
 import type { ChatMessage } from '../../api/types.ts'
 import { loadChat, saveChat } from './chatStorage.ts'
@@ -16,14 +17,14 @@ const SUGGESTIONS = [
 const WEEK_SUMMARY_TITLE = 'Mis últimos entrenos de la semana ('
 
 export default function PlanChatPage() {
+  const navigate = useNavigate()
   const [messages, setMessages] = useState<ChatMessage[]>(loadChat)
   const [draft, setDraft] = useState('')
   const [pending, setPending] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [extracting, setExtracting] = useState(false)
-  const [planError, setPlanError] = useState<string | null>(null)
-  const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
+  const [planError, setPlanError] = useState<string | null>(null)
   // Read from the text itself, so it survives a reload and comes back after "Empezar de nuevo".
   const weekShared = [draft, ...messages.map((m) => m.text)].some((text) => text.includes(WEEK_SUMMARY_TITLE))
   const endRef = useRef<HTMLDivElement>(null)
@@ -127,8 +128,8 @@ export default function PlanChatPage() {
       {messages.length === 0 && (
         <section className="chat-intro">
           <p className="muted">
-            Cuéntale al entrenador IA (Gemini) qué quieres conseguir y diseñad juntos tu semana. Solo conoce los
-            nombres de tus tipos de entrenamiento: si quieres que sepa lo que has hecho, comparte tu última semana.
+            Cuéntale al entrenador IA (Gemini) qué quieres conseguir y diseñad juntos tu semana. Solo conoce los nombres
+            de tus tipos de entrenamiento: si quieres que sepa lo que has hecho, comparte tu última semana.
           </p>
           <div className="chat-suggestions">
             {SUGGESTIONS.map((text) => (
@@ -187,19 +188,14 @@ export default function PlanChatPage() {
             placeholder="Escribe un mensaje"
             aria-label="Mensaje"
             value={draft}
-            maxLength={4000}
+            maxLength={LIMITS.chatMessage}
             onChange={(event) => {
               setDraft(event.target.value)
               resize(event.target, event.target.value)
             }}
             onKeyDown={onKeyDown}
           />
-          <button
-            type="submit"
-            className="button chat-send"
-            disabled={pending || !draft.trim()}
-            aria-label="Enviar"
-          >
+          <button type="submit" className="button chat-send" disabled={pending || !draft.trim()} aria-label="Enviar">
             ↑
           </button>
         </div>

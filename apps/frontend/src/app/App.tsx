@@ -6,7 +6,7 @@ import ExerciseDetailPage from '../features/exercises/ExerciseDetailPage.tsx'
 import SessionDetailPage from '../features/sessions/SessionDetailPage.tsx'
 import { TabPages } from './TabBar.tsx'
 
-// A data router: it's what enables view transitions and scroll restoration.
+// A data router: it's what enables scroll restoration.
 const router = createBrowserRouter([
   {
     element: <Root />,

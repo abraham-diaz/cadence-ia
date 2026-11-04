@@ -1,12 +1,7 @@
 import { useState } from 'react'
 import { fetchMuscles } from '../../api/exercises.ts'
 import type { WorkoutType } from '../../api/types.ts'
-import {
-  createWorkoutType,
-  deleteWorkoutType,
-  fetchWorkoutTypes,
-  updateWorkoutType,
-} from '../../api/workoutTypes.ts'
+import { createWorkoutType, deleteWorkoutType, fetchWorkoutTypes, updateWorkoutType } from '../../api/workoutTypes.ts'
 import { useFetch } from '../../shared/useFetch.ts'
 import { CATEGORY_LABELS } from './categories.ts'
 import WorkoutTypeForm from './WorkoutTypeForm.tsx'
@@ -22,8 +17,7 @@ export default function WorkoutTypesPage() {
   const [error, setError] = useState<string | null>(null)
 
   async function remove(type: WorkoutType) {
-    const sessions =
-      type.session_count === 1 ? '1 sesión quedará' : `${type.session_count} sesiones quedarán`
+    const sessions = type.session_count === 1 ? '1 sesión quedará' : `${type.session_count} sesiones quedarán`
     const warning = type.session_count ? `\n${sessions} sin clasificar.` : ''
     if (!window.confirm(`¿Borrar «${type.name}»?${warning}`)) return
     setError(null)

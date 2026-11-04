@@ -4,6 +4,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, Field
 
+from cadence_ia.domain.workout_type import Category
 from cadence_ia.llm.coach import ChatMessage
 
 EXTRACT_PROMPT = """\
@@ -43,7 +44,7 @@ class ExerciseDraft(BaseModel):
 class DayDraft(BaseModel):
     weekday: int = Field(description="0 = lunes ... 6 = domingo.")
     workout_type: str
-    category: str = Field(description='"strength" o "cardio".')
+    category: Category
     minutes: int
     note: str | None
     exercises: list[ExerciseDraft]
@@ -61,8 +62,6 @@ class PlanDraft(BaseModel):
 
 
 class PlanExtractor(Protocol):
-    model: str
-
     def __call__(self, type_names: list[str], messages: list[ChatMessage]) -> PlanDraft: ...
 
 

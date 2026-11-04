@@ -34,10 +34,13 @@ def sync_catalog(
     return len(catalog)
 
 
-def suggestions_for_type(conn: sqlite3.Connection, type_id: int, day: date) -> list[MuscleSuggestion]:
-    """A few exercises for each muscle the type trains; they change from one day to the next."""
+def suggestions_for_type(
+    conn: sqlite3.Connection, type_id: int, day: date | None = None
+) -> list[MuscleSuggestion]:
+    """A few exercises for each muscle the type trains; they change from day to day."""
     muscles = get_type(conn, type_id).muscles
-    return suggest(exercises.for_muscles(conn, muscles), muscles, seed=day.isoformat())
+    seed = (day or date.today()).isoformat()
+    return suggest(exercises.for_muscles(conn, muscles), muscles, seed=seed)
 
 
 def search_catalog(conn: sqlite3.Connection, query: str) -> list[CatalogExercise]:

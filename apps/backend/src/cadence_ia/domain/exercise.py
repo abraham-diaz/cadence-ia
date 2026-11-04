@@ -30,8 +30,6 @@ def sort_muscles(muscles) -> tuple[Muscle, ...]:
 
 @dataclass(frozen=True)
 class CatalogExercise:
-    """An exercise from the wger catalog."""
-
     id: int  # wger's id, kept so a new sync updates it in place
     name_es: str | None
     name_en: str | None

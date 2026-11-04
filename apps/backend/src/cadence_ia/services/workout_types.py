@@ -54,6 +54,6 @@ def update_type(
 
 
 def delete_type(conn: sqlite3.Connection, type_id: int) -> None:
-    """Delete a type. Its sessions go back to having no type."""
+    """Its sessions are left without a type."""
     if not workout_types.delete_type(conn, type_id):
         raise _not_found()

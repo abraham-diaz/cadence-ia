@@ -137,7 +137,7 @@ def analyze(
     smooth_window: int = SMOOTH_WINDOW_S,
     threshold: float | None = None,
 ) -> WorkoutMetrics:
-    """Analyze an activity. `threshold` defaults to a share of the average HR."""
+    """`threshold` defaults to a share of the average HR."""
     hr = resample(activity.trackpoints)
     hr_avg = sum(hr) / len(hr)
     if threshold is None:

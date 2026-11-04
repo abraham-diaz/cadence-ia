@@ -15,7 +15,11 @@ export default function ExerciseDetailPage() {
   return (
     <main className="page">
       <nav className="top-bar">
-        <button type="button" className="back-link link-button" onClick={() => (canGoBack ? navigate(-1) : navigate('/'))}>
+        <button
+          type="button"
+          className="back-link link-button"
+          onClick={() => (canGoBack ? navigate(-1) : navigate('/'))}
+        >
           ‹ Volver
         </button>
       </nav>

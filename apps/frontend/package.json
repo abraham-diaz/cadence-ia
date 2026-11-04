@@ -8,6 +8,8 @@
     "dev:web": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "gen:api": "npx --yes -p typescript@5.9.3 -p openapi-typescript@7.13.0 openapi-typescript openapi.json -o src/api/schema.d.ts",
     "preview": "vite preview"
   },
@@ -24,6 +26,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
+    "prettier": "3.9.10",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
   }

@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { fetchMuscles } from '../../api/exercises.ts'
+import { LIMITS } from '../../api/limits.ts'
 import type { Category, Muscle, WorkoutTypeInput } from '../../api/types.ts'
 import { useFetch } from '../../shared/useFetch.ts'
-import { CATEGORY_LABELS } from './categories.ts'
+import CategoryPicker from './CategoryPicker.tsx'
 
 interface Props {
   initial?: WorkoutTypeInput
@@ -40,24 +41,11 @@ export default function WorkoutTypeForm({ initial, submitLabel, onSubmit, onCanc
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Nombre, p. ej. Pierna"
-        maxLength={60}
+        maxLength={LIMITS.typeName}
         aria-label="Nombre del tipo"
         autoFocus
       />
-      <div className="segmented" role="radiogroup" aria-label="Categoría">
-        {(Object.keys(CATEGORY_LABELS) as Category[]).map((value) => (
-          <button
-            key={value}
-            type="button"
-            role="radio"
-            aria-checked={category === value}
-            className={category === value ? 'selected' : ''}
-            onClick={() => setCategory(value)}
-          >
-            {CATEGORY_LABELS[value]}
-          </button>
-        ))}
-      </div>
+      <CategoryPicker value={category} onChange={setCategory} />
       {category === 'strength' && options.state.status === 'ok' && (
         <fieldset className="muscle-picker">
           <legend className="muted small">Músculos que trabaja</legend>

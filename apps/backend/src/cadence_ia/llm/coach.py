@@ -48,8 +48,6 @@ class ChatMessage:
 
 
 class Coach(Protocol):
-    model: str
-
     def __call__(self, context: dict, messages: list[ChatMessage]) -> str: ...
 
 

@@ -17,7 +17,7 @@ const HeartRateChart = lazy(() => import('./HeartRateChart.tsx'))
 
 export default function SessionDetailPage() {
   const { id = '' } = useParams()
-  const { state, setData } = useFetch(() => fetchSession(id), id)
+  const { state, setData } = useFetch(() => fetchSession(id), `session:${id}`)
 
   return (
     <main className="page">

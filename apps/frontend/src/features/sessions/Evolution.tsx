@@ -49,7 +49,7 @@ export default function Evolution({ session }: { session: SessionDetail }) {
           </h3>
           {m.hint && <p className="muted small">{m.hint}</p>}
           <Suspense fallback={<div className="trend-chart" />}>
-            <TrendChart history={session.history} currentId={session.id} metric={m.key} unit={m.unit} />
+            <TrendChart history={session.history} currentId={session.id} metric={m.key} title={m.title} unit={m.unit} />
           </Suspense>
         </div>
       ))}

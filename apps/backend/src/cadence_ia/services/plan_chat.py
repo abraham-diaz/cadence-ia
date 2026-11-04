@@ -82,16 +82,12 @@ def _proposed_day(
         week=week,
         weekday=day.weekday,
         type_name=existing.name if existing else name,
-        category=existing.category if existing else _category(day.category),
+        category=existing.category if existing else day.category,
         workout_type_id=existing.id if existing else None,
         minutes=max(1, day.minutes),
         note=(day.note or "").strip() or None,
         exercises=link_to_catalog(items, catalog),
     )
-
-
-def _category(value: str) -> Category:
-    return "cardio" if value.strip().lower() == "cardio" else "strength"
 
 
 @contextmanager

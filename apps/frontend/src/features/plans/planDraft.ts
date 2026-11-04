@@ -79,7 +79,9 @@ export function fromPlan(plan: Plan): PlanDraft {
       week: day.week,
       weekday: day.weekday,
       // A deleted type leaves the day without one: the review asks for a name.
-      type: day.workout_type ? { kind: 'existing', id: day.workout_type.id } : { kind: 'new', name: '', category: 'strength' },
+      type: day.workout_type
+        ? { kind: 'existing', id: day.workout_type.id }
+        : { kind: 'new', name: '', category: 'strength' },
       minutes: String(day.minutes),
       note: day.note ?? '',
       exercises: draftExercises(day.exercises),

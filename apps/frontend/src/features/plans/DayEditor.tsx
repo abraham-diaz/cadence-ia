@@ -138,7 +138,9 @@ export default function DayEditor({ day, types, newTypes, onChange, onRemove }: 
                 type="button"
                 className="link-button danger"
                 aria-label={`Quitar ${exercise.name || 'ejercicio'}`}
-                onClick={() => onChange((d) => ({ ...d, exercises: d.exercises.filter((e) => e.key !== exercise.key) }))}
+                onClick={() =>
+                  onChange((d) => ({ ...d, exercises: d.exercises.filter((e) => e.key !== exercise.key) }))
+                }
               >
                 ✕
               </button>

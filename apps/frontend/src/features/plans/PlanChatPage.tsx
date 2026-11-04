@@ -127,8 +127,8 @@ export default function PlanChatPage() {
       {messages.length === 0 && (
         <section className="chat-intro">
           <p className="muted">
-            Cuéntale al entrenador IA (Gemini) qué quieres conseguir y diseñad juntos tu semana. Solo conoce los
-            nombres de tus tipos de entrenamiento: si quieres que sepa lo que has hecho, comparte tu última semana.
+            Cuéntale al entrenador IA (Gemini) qué quieres conseguir y diseñad juntos tu semana. Solo conoce los nombres
+            de tus tipos de entrenamiento: si quieres que sepa lo que has hecho, comparte tu última semana.
           </p>
           <div className="chat-suggestions">
             {SUGGESTIONS.map((text) => (
@@ -194,12 +194,7 @@ export default function PlanChatPage() {
             }}
             onKeyDown={onKeyDown}
           />
-          <button
-            type="submit"
-            className="button chat-send"
-            disabled={pending || !draft.trim()}
-            aria-label="Enviar"
-          >
+          <button type="submit" className="button chat-send" disabled={pending || !draft.trim()} aria-label="Enviar">
             ↑
           </button>
         </div>

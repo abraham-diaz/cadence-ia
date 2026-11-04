@@ -10,5 +10,4 @@ export const fetchSession = (id: string) => request<SessionDetail>(sessionPath(i
 export const setSessionType = (id: string, workoutTypeId: number | null) =>
   send<SessionDetail>('PUT', `${sessionPath(id)}/workout-type`, { workout_type_id: workoutTypeId })
 
-export const requestAssessment = (id: string) =>
-  send<Assessment>('POST', `${sessionPath(id)}/assessment`)
+export const requestAssessment = (id: string) => send<Assessment>('POST', `${sessionPath(id)}/assessment`)

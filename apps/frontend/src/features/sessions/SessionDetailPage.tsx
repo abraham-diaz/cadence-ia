@@ -74,12 +74,17 @@ function Detail({ session, onChange }: { session: SessionDetail; onChange: (s: S
 
       {base && (
         <p className="muted small compare-note">
-          Comparado con tu media de {base.sessions === 1 ? 'la sesión anterior' : `las ${base.sessions} anteriores`}{' '}
-          de {type?.name}
+          Comparado con tu media de {base.sessions === 1 ? 'la sesión anterior' : `las ${base.sessions} anteriores`} de{' '}
+          {type?.name}
         </p>
       )}
       <section className="stat-grid" aria-label="Resumen">
-        <Stat label="Duración" value={formatClock(session.duration_s)} delta={delta('duration_s', 60)} deltaUnit=" min" />
+        <Stat
+          label="Duración"
+          value={formatClock(session.duration_s)}
+          delta={delta('duration_s', 60)}
+          deltaUnit=" min"
+        />
         <Stat label="FC media" value={session.hr_avg} unit="ppm" delta={delta('hr_avg')} />
         <Stat label="FC máx." value={session.hr_max} unit="ppm" delta={delta('hr_max')} />
         {isStrength && (

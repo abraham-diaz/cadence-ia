@@ -3,9 +3,7 @@ import { formatClock, formatDrop } from '../../shared/format.ts'
 
 export default function SegmentList({ segments }: { segments: Segment[] }) {
   // Number only the sets: "Serie 1", "Descanso", "Serie 2", ...
-  const setNumbers = segments.map(
-    (_, i) => segments.slice(0, i + 1).filter((s) => s.kind === 'work').length,
-  )
+  const setNumbers = segments.map((_, i) => segments.slice(0, i + 1).filter((s) => s.kind === 'work').length)
 
   return (
     <ol className="segment-list">

@@ -6,7 +6,16 @@ import { fetchWorkoutTypes } from '../../api/workoutTypes.ts'
 import { useFetch } from '../../shared/useFetch.ts'
 import { CATEGORY_LABELS } from '../workout-types/categories.ts'
 import DayEditor from './DayEditor.tsx'
-import { loadDraft, newKey, newTypes, sameName, saveDraft, toInput, type DraftDay, type PlanDraft } from './planDraft.ts'
+import {
+  loadDraft,
+  newKey,
+  newTypes,
+  sameName,
+  saveDraft,
+  toInput,
+  type DraftDay,
+  type PlanDraft,
+} from './planDraft.ts'
 import './plans.css'
 import { weekLetter } from './weeks.ts'
 
@@ -69,7 +78,9 @@ export default function PlanReviewPage() {
       ...d,
       weeks: d.weeks - 1,
       currentWeek: Math.min(d.currentWeek, d.weeks - 2),
-      days: d.days.filter((day) => day.week !== week).map((day) => (day.week > week ? { ...day, week: day.week - 1 } : day)),
+      days: d.days
+        .filter((day) => day.week !== week)
+        .map((day) => (day.week > week ? { ...day, week: day.week - 1 } : day)),
     }))
     setViewWeek(Math.max(0, week - 1))
   }
@@ -150,7 +161,10 @@ export default function PlanReviewPage() {
                 aria-label={`Qué hacer con ${type.name}`}
                 value="new"
                 onChange={(e) =>
-                  updateNewType(type.name, (day) => ({ ...day, type: { kind: 'existing', id: Number(e.target.value) } }))
+                  updateNewType(type.name, (day) => ({
+                    ...day,
+                    type: { kind: 'existing', id: Number(e.target.value) },
+                  }))
                 }
               >
                 <option value="new">Crear como tipo nuevo</option>

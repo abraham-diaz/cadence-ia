@@ -1,10 +1,5 @@
 import { LineChart } from 'echarts/charts'
-import {
-  DataZoomComponent,
-  GridComponent,
-  MarkAreaComponent,
-  TooltipComponent,
-} from 'echarts/components'
+import { DataZoomComponent, GridComponent, MarkAreaComponent, TooltipComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { useEffect, useRef } from 'react'
@@ -79,9 +74,7 @@ function buildOption(points: HeartRatePoint[], segments: Segment[]): echarts.ECh
         markArea: {
           silent: true,
           itemStyle: { color: c.band },
-          data: segments
-            .filter((s) => s.kind === 'work')
-            .map((s) => [{ xAxis: s.start_s }, { xAxis: s.end_s }]),
+          data: segments.filter((s) => s.kind === 'work').map((s) => [{ xAxis: s.start_s }, { xAxis: s.end_s }]),
         },
       },
     ],

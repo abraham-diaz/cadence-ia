@@ -1,12 +1,10 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
-export const TAB_PATHS = ['/', '/plan', '/tipos']
-
 const MIN_DISTANCE = 60
 
 /** Swiping left or right moves to the next or previous tab. */
-export function useTabSwipe() {
+export function useTabSwipe(paths: string[]) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
@@ -26,9 +24,9 @@ export function useTabSwipe() {
       start = null
       if (Math.abs(dx) < MIN_DISTANCE || Math.abs(dx) < 2 * Math.abs(dy)) return
 
-      const current = TAB_PATHS.indexOf(pathname)
+      const current = paths.indexOf(pathname)
       if (current === -1) return // a detail page: the swipe is iOS's "back"
-      const to = TAB_PATHS[current + (dx < 0 ? 1 : -1)]
+      const to = paths[current + (dx < 0 ? 1 : -1)]
       if (!to) return
       navigate(to)
     }
@@ -45,7 +43,7 @@ export function useTabSwipe() {
       window.removeEventListener('touchend', onEnd)
       window.removeEventListener('touchcancel', onCancel)
     }
-  }, [pathname, navigate])
+  }, [pathname, navigate, paths])
 }
 
 /** Text fields and anything that already scrolls sideways keep the swipe for themselves. */

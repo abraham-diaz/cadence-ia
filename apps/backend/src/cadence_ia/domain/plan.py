@@ -1,8 +1,9 @@
 """A training plan: one or more weeks that repeat in turn (week A, week B...)."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
 
+from cadence_ia.domain.exercise import CatalogExercise, find_by_name
 from cadence_ia.domain.workout_type import WorkoutType
 
 
@@ -42,3 +43,21 @@ def cycle_start(today: date, current_week: int) -> date:
     """The Monday the cycle started, given which week of it is the current one."""
     monday = today - timedelta(days=today.weekday())
     return monday - timedelta(weeks=current_week)
+
+
+def link_to_catalog(
+    items: tuple[Exercise, ...], catalog: list[CatalogExercise]
+) -> tuple[Exercise, ...]:
+    """Point each exercise to its catalog entry: the one picked, or the one with the same name."""
+    known = {e.id: e for e in catalog}
+    linked = []
+    for item in items:
+        match = known.get(item.catalog_id) if item.catalog_id else find_by_name(catalog, item.name)
+        linked.append(
+            replace(
+                item,
+                catalog_id=match.id if match else None,
+                image_url=match.image_url if match else None,
+            )
+        )
+    return tuple(linked)

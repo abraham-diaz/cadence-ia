@@ -1,39 +1,16 @@
-import { LineChart } from 'echarts/charts'
-import {
-  DataZoomComponent,
-  GridComponent,
-  MarkAreaComponent,
-  TooltipComponent,
-} from 'echarts/components'
-import * as echarts from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { useEffect, useRef } from 'react'
+import { DataZoomComponent, MarkAreaComponent } from 'echarts/components'
 import type { HeartRatePoint, Segment } from '../../api/types.ts'
 import { formatClock } from '../../shared/format.ts'
+import { echarts, themeColors, useChart, type ChartOption } from './echarts.ts'
 
-// Only register the pieces we use, to keep the bundle small.
-echarts.use([LineChart, GridComponent, TooltipComponent, MarkAreaComponent, DataZoomComponent, CanvasRenderer])
+echarts.use([MarkAreaComponent, DataZoomComponent])
 
 interface Props {
   points: HeartRatePoint[]
   segments: Segment[]
 }
 
-/** Theme colors, defined as CSS variables in styles/tokens.css. */
-function themeColors() {
-  const css = getComputedStyle(document.documentElement)
-  const get = (name: string) => css.getPropertyValue(name).trim()
-  return {
-    line: get('--hr'),
-    band: get('--hr-band'),
-    text: get('--text-secondary'),
-    grid: get('--grid'),
-    surface: get('--surface'),
-    ink: get('--text-primary'),
-  }
-}
-
-function buildOption(points: HeartRatePoint[], segments: Segment[]): echarts.EChartsCoreOption {
+function buildOption(points: HeartRatePoint[], segments: Segment[]): ChartOption {
   const c = themeColors()
   const hrs = points.map((p) => p.hr)
 
@@ -74,14 +51,12 @@ function buildOption(points: HeartRatePoint[], segments: Segment[]): echarts.ECh
         type: 'line',
         data: points.map((p) => [p.t, p.hr]),
         showSymbol: false,
-        lineStyle: { width: 2, color: c.line },
-        itemStyle: { color: c.line },
+        lineStyle: { width: 2, color: c.hr },
+        itemStyle: { color: c.hr },
         markArea: {
           silent: true,
-          itemStyle: { color: c.band },
-          data: segments
-            .filter((s) => s.kind === 'work')
-            .map((s) => [{ xAxis: s.start_s }, { xAxis: s.end_s }]),
+          itemStyle: { color: c.hrBand },
+          data: segments.filter((s) => s.kind === 'work').map((s) => [{ xAxis: s.start_s }, { xAxis: s.end_s }]),
         },
       },
     ],
@@ -89,25 +64,7 @@ function buildOption(points: HeartRatePoint[], segments: Segment[]): echarts.ECh
 }
 
 export default function HeartRateChart({ points, segments }: Props) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!ref.current) return
-    const chart = echarts.init(ref.current)
-    const render = () => chart.setOption(buildOption(points, segments), true)
-    render()
-
-    const scheme = window.matchMedia('(prefers-color-scheme: dark)')
-    const resize = () => chart.resize()
-    scheme.addEventListener('change', render)
-    window.addEventListener('resize', resize)
-    return () => {
-      scheme.removeEventListener('change', render)
-      window.removeEventListener('resize', resize)
-      chart.dispose()
-    }
-  }, [points, segments])
-
+  const ref = useChart(() => buildOption(points, segments), [points, segments])
   return (
     <div
       ref={ref}

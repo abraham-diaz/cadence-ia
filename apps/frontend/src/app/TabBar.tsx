@@ -1,14 +1,19 @@
-import { CalendarDays, House, Tag, type LucideIcon } from 'lucide-react'
+import { CalendarDays, House, Tag } from 'lucide-react'
 import { Activity, useState } from 'react'
 import { NavLink, useLocation } from 'react-router'
 import HomePage from '../features/home/HomePage.tsx'
 import PlanPage from '../features/plans/PlanPage.tsx'
 import WorkoutTypesPage from '../features/workout-types/WorkoutTypesPage.tsx'
-import { TAB_PATHS, useTabSwipe } from './tabNavigation.ts'
+import { useTabSwipe } from './tabNavigation.ts'
 import './tab-bar.css'
 
-// Same order as TAB_PATHS.
-const PAGES = [HomePage, PlanPage, WorkoutTypesPage]
+// In order: swiping moves along this list.
+const TABS = [
+  { path: '/', label: 'Inicio', icon: House, Page: HomePage },
+  { path: '/plan', label: 'Plan', icon: CalendarDays, Page: PlanPage },
+  { path: '/tipos', label: 'Tipos', icon: Tag, Page: WorkoutTypesPage },
+]
+const TAB_PATHS = TABS.map((tab) => tab.path)
 
 /** The main pages, with the tab bar at the bottom like an iPhone app. They stay mounted
     while hidden, so switching tabs or coming back from a detail page is instant. */
@@ -16,41 +21,27 @@ export function TabPages() {
   const { pathname } = useLocation()
   const onTab = TAB_PATHS.includes(pathname)
   const enter = useEnterDirection(pathname)
-  useTabSwipe()
+  useTabSwipe(TAB_PATHS)
   return (
     <div className="with-tabs">
-      {TAB_PATHS.map((path, i) => {
-        const Page = PAGES[i]
-        return (
-          <Activity key={path} mode={path === pathname ? 'visible' : 'hidden'}>
-            {/* Shown again after display: none, the wrapper replays its slide-in. */}
-            <div className="tab-page" data-enter={enter}>
-              <Page />
-            </div>
-          </Activity>
-        )
-      })}
-      {onTab && <TabBar />}
+      {TABS.map(({ path, Page }) => (
+        <Activity key={path} mode={path === pathname ? 'visible' : 'hidden'}>
+          {/* Shown again after display: none, the wrapper replays its slide-in. */}
+          <div className="tab-page" data-enter={enter}>
+            <Page />
+          </div>
+        </Activity>
+      ))}
+      {onTab && (
+        <nav className="tab-bar" aria-label="Secciones">
+          {TABS.map(({ path, label, icon: Icon }) => (
+            <NavLink key={path} to={path} end className="tab" aria-label={label}>
+              <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+            </NavLink>
+          ))}
+        </nav>
+      )}
     </div>
-  )
-}
-
-// Same order as TAB_PATHS, which the swipe follows.
-function TabBar() {
-  return (
-    <nav className="tab-bar" aria-label="Secciones">
-      <Tab to="/" label="Inicio" icon={House} end />
-      <Tab to="/plan" label="Plan" icon={CalendarDays} />
-      <Tab to="/tipos" label="Tipos" icon={Tag} />
-    </nav>
-  )
-}
-
-function Tab({ to, label, icon: Icon, end }: { to: string; label: string; icon: LucideIcon; end?: boolean }) {
-  return (
-    <NavLink to={to} end={end} className="tab" aria-label={label}>
-      <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
-    </NavLink>
   )
 }
 

@@ -54,8 +54,8 @@ export default function WeekStrip({ progress, today, sessions }: Props) {
           </>
         ) : (
           <>
-            <strong>{trained}</strong> {trained === 1 ? 'sesión' : 'sesiones'} · <strong>{progress.done_minutes}</strong>{' '}
-            min
+            <strong>{trained}</strong> {trained === 1 ? 'sesión' : 'sesiones'} ·{' '}
+            <strong>{progress.done_minutes}</strong> min
           </>
         )}
       </p>

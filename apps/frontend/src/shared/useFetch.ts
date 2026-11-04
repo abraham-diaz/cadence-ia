@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-export type FetchState<T> =
-  | { status: 'loading' }
-  | { status: 'error'; error: string }
-  | { status: 'ok'; data: T }
+export type FetchState<T> = { status: 'loading' } | { status: 'error'; error: string } | { status: 'ok'; data: T }
 
 // The last data of each key: going back to a page paints it at once, then refreshes it.
 const cache = new Map<string, unknown>()

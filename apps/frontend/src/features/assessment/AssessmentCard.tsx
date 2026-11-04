@@ -32,8 +32,8 @@ export default function AssessmentCard({ sessionId, assessment, onChange }: Prop
       <section className="card assessment">
         <h2>Valoración</h2>
         <p className="muted small">
-          Un entrenador IA (Gemini) comenta la sesión a partir de tus métricas. Solo se envían las cifras:
-          ni el archivo, ni el GPS, ni datos tuyos.
+          Un entrenador IA (Gemini) comenta la sesión a partir de tus métricas. Solo se envían las cifras: ni el
+          archivo, ni el GPS, ni datos tuyos.
         </p>
         <button type="button" className="button" onClick={ask} disabled={loading}>
           {loading ? 'Pensando…' : 'Pedir valoración'}

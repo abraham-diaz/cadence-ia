@@ -41,9 +41,7 @@ export default function Evolution({ session }: { session: SessionDetail }) {
   return (
     <section className="card evolution">
       <h2>Evolución · {type.name}</h2>
-      <p className="muted small">
-        {session.history.length} sesiones · el punto grande es esta
-      </p>
+      <p className="muted small">{session.history.length} sesiones · el punto grande es esta</p>
       {metrics.map((m) => (
         <div key={m.key} className="trend">
           <h3>
@@ -51,7 +49,7 @@ export default function Evolution({ session }: { session: SessionDetail }) {
           </h3>
           {m.hint && <p className="muted small">{m.hint}</p>}
           <Suspense fallback={<div className="trend-chart" />}>
-            <TrendChart history={session.history} currentId={session.id} metric={m.key} unit={m.unit} />
+            <TrendChart history={session.history} currentId={session.id} metric={m.key} title={m.title} unit={m.unit} />
           </Suspense>
         </div>
       ))}

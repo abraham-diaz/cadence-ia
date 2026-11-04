@@ -896,34 +896,29 @@
         "properties": {
           "headline": {
             "type": "string",
-            "title": "Headline",
-            "description": "Una frase corta que resuma la sesión."
+            "title": "Headline"
           },
           "summary": {
             "type": "string",
-            "title": "Summary",
-            "description": "Valoración general en 2-3 frases."
+            "title": "Summary"
           },
           "strengths": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Strengths",
-            "description": "2-3 cosas que fueron bien."
+            "title": "Strengths"
           },
           "improvements": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Improvements",
-            "description": "1-3 cosas a mejorar."
+            "title": "Improvements"
           },
           "advice": {
             "type": "string",
-            "title": "Advice",
-            "description": "Un consejo concreto para la próxima sesión."
+            "title": "Advice"
           },
           "model": {
             "type": "string",

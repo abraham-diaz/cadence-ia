@@ -223,7 +223,9 @@ button.week-dot:active {
 }
 
 .week-dot.open {
-  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--done);
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 5px var(--done);
 }
 
 .day-sessions {

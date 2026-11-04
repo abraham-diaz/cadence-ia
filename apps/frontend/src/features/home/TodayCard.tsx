@@ -5,7 +5,7 @@ import PlanWorkout from '../plans/PlanWorkout.tsx'
 import { WEEKDAYS, workoutName } from '../plans/weeks.ts'
 
 /** What the plan asks for today, or a way to make a plan. */
-export default function TodayCard({ progress, today: date }: { progress: WeekProgress; today: string }) {
+export default function TodayCard({ progress, today }: { progress: WeekProgress; today: string }) {
   if (!progress.plan_title) {
     return (
       <section className="card today-card">
@@ -19,9 +19,9 @@ export default function TodayCard({ progress, today: date }: { progress: WeekPro
     )
   }
 
-  const index = progress.days.findIndex((d) => d.date === date)
-  const today = progress.days[index]
-  const planned = today?.planned ?? []
+  const index = progress.days.findIndex((d) => d.date === today)
+  const day = progress.days[index]
+  const planned = day?.planned ?? []
 
   if (planned.length === 0) {
     const next = progress.days.slice(index + 1).find((d) => d.planned.length > 0)
@@ -30,7 +30,7 @@ export default function TodayCard({ progress, today: date }: { progress: WeekPro
         <p className="today-kicker">Hoy toca</p>
         <p className="today-title">Descanso</p>
         <p className="muted small">
-          {today?.session_ids.length
+          {day?.session_ids.length
             ? 'Y aun así has entrenado.'
             : next
               ? `${WEEKDAYS[progress.days.indexOf(next)]}: ${next.planned.map(workoutName).join(' + ')}`
@@ -50,7 +50,7 @@ export default function TodayCard({ progress, today: date }: { progress: WeekPro
       <ul className="today-workouts">
         {planned.map((workout, i) => (
           <li key={i}>
-            <PlanWorkout workout={workout} suggestOn={date} done={workout.done && !allDone} />
+            <PlanWorkout workout={workout} suggestOn={today} done={workout.done && !allDone} />
           </li>
         ))}
       </ul>

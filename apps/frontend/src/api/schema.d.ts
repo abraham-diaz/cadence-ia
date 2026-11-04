@@ -335,30 +335,15 @@ export interface components {
     schemas: {
         /** AssessmentOut */
         AssessmentOut: {
-            /**
-             * Headline
-             * @description Una frase corta que resuma la sesión.
-             */
+            /** Headline */
             headline: string;
-            /**
-             * Summary
-             * @description Valoración general en 2-3 frases.
-             */
+            /** Summary */
             summary: string;
-            /**
-             * Strengths
-             * @description 2-3 cosas que fueron bien.
-             */
+            /** Strengths */
             strengths: string[];
-            /**
-             * Improvements
-             * @description 1-3 cosas a mejorar.
-             */
+            /** Improvements */
             improvements: string[];
-            /**
-             * Advice
-             * @description Un consejo concreto para la próxima sesión.
-             */
+            /** Advice */
             advice: string;
             /** Model */
             model: string;

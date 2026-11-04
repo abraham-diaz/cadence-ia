@@ -3,7 +3,7 @@ import type { ErrorCode } from './types.ts'
 // `null` shows the server's own message, already in Spanish (e.g. Gemini's quota).
 // Typed against the backend: a new error code won't compile until it's here.
 const ERROR_MESSAGES: Record<ErrorCode, string | null> = {
-  session_not_found: 'No encontrado',
+  session_not_found: 'Esa sesión ya no existe',
   workout_type_not_found: 'Ese tipo de entrenamiento ya no existe',
   exercise_not_found: 'Ese ejercicio ya no está en el catálogo',
   duplicate_workout_type: 'Ya existe un tipo con ese nombre',
@@ -32,10 +32,9 @@ function validationMessage(errors: { loc?: (string | number)[]; msg?: string }[]
 }
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
-    ...init,
-    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
-  })
+  const headers = new Headers(init?.headers)
+  if (init?.body) headers.set('Content-Type', 'application/json')
+  const response = await fetch(path, { ...init, headers })
   if (!response.ok) throw new Error(await errorMessage(response))
   return (response.status === 204 ? undefined : await response.json()) as T
 }

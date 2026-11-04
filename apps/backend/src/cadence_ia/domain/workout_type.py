@@ -19,8 +19,6 @@ class WorkoutType:
 
 @dataclass(frozen=True)
 class WorkoutTypeUsage:
-    """A workout type, the muscles it trains and how many sessions have it."""
-
     workout_type: WorkoutType
     session_count: int
     muscles: tuple[Muscle, ...] = ()

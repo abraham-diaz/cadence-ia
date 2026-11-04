@@ -28,8 +28,6 @@ STRENGTH_ONLY = ("sets", "avg_rest_s", "recovery_30s", "recovery_60s")
 
 @dataclass(frozen=True)
 class HistoryEntry:
-    """One session's stats, as listed in its workout type's history."""
-
     id: str
     start_time: datetime
     stats: Stats
